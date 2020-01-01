@@ -6,7 +6,7 @@ interface DraggableParameters {
     swipeOut: boolean,
     swipeOutBy: string,
     threshold: string,
-    direction: string,
+    direction?: Direction, // TODO: changed to 1 | -1
 }
 
 const DefaultParameters: DraggableParameters = {
@@ -17,10 +17,11 @@ const DefaultParameters: DraggableParameters = {
     swipeOut: false,
     swipeOutBy: '50%',
     threshold: '5',
-    direction: '',
+    // direction: null,
 };
 
 type SwipeType = 'horizontal' | 'vertical';
+type Direction = 'top' | 'bottom' | 'left' | 'right' | null;
 
 const Draggable: any = {
     bind: (el: any, binding: {value: DraggableParameters}, vnode: any) => {
@@ -44,6 +45,11 @@ const Draggable: any = {
         let initialY = 0;
 
         el.addEventListener('touchstart', function (e: any) {
+
+            if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
+                return;
+            }
+
             const touchObj = e.changedTouches[0];
             el.style.transition = 'none';
             if (!swipedOut) {
@@ -144,7 +150,7 @@ const Draggable: any = {
                 const event = {direction: touchObj.pageY - initialY > 0 ? 'bottom' : 'up'};
                 Emit(vnode, event, true);
             } else {
-                reset(el, backTime);
+                Reset(el, backTime);
                 swipedOut = false;
                 Log('END: resettings');
             }
@@ -163,7 +169,7 @@ const Draggable: any = {
  * @param threshold Minim amount of pixels of movement before a swipe is registered
  * @returns {boolean} True if an actual swipe has not been registered
  */
-function ShouldSkip (type: SwipeType, pageY: number, initialY: number, pageX: number, initialX: number, threshold: string) {
+function ShouldSkip (type: SwipeType, pageY: number, initialY: number, pageX: number, initialX: number, threshold: string): boolean {
     Log('SKIP_CHECK -> ', {...arguments});
     // if (type === 'horizontal' && Math.abs(pageY - initialY) >= Math.abs(pageX - initialX)) { return true }
     if (type === 'horizontal') {
@@ -180,22 +186,22 @@ function ShouldSkip (type: SwipeType, pageY: number, initialY: number, pageX: nu
  * @param type Type of swipe ('horizontal' or 'vertical')
  * @returns {number} The actual number of pixels
  */
-function GetActualPixels (inputValue: string, element: any, type: SwipeType) {
-    let actualValue;
+function GetActualPixels (inputValue: string, element: any, type: SwipeType): number {
+    let actualValue: number;
     if (inputValue.includes != null) {
         if (inputValue.includes('%')) {
             if (type === 'horizontal') {
-                actualValue = element.clientWidth * +inputValue.slice(0, -1) / 100;
+                actualValue = element.clientWidth * +inputValue.slice(0, -1) / 100; // TODO: check if float is needed
             } else {
                 actualValue = element.clientHeight * +inputValue.slice(0, -1) / 100;
             }
         } else if (inputValue.includes('px')) {
-            actualValue = inputValue.slice(0, -2);
+            actualValue = +inputValue.slice(0, -2);
         } else {
-            return inputValue;
+            return +inputValue;
         }
     } else {
-        return inputValue;
+        return +inputValue;
     }
 
     return actualValue;
@@ -206,7 +212,7 @@ function GetActualPixels (inputValue: string, element: any, type: SwipeType) {
  * @param el Element
  * @param backTime Animation time for the transform 0
  */
-function reset (el: any, backTime: string) {
+function Reset (el: any, backTime: string): void {
     el.style.transition = `transform ${backTime || '.5s'}`;
     requestAnimationFrame(() => {
         el.style.transform = '';
@@ -216,11 +222,11 @@ function reset (el: any, backTime: string) {
     })
 }
 
-function Log (...args: any[]) {
+function Log (...args: any[]): void {
     console.log(args);
 }
 
-function Emit(vnode: any, event: any) {
+function Emit(vnode: any, event: any): void {
     vnode.context.$emit(`swiped`, event);
     if (vnode.componentInstance) {
         vnode.componentInstance.$emit('swiped', event); // use {detail:} to be uniform
