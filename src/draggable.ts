@@ -6,7 +6,7 @@ interface DraggableParameters {
     swipeOut: boolean,
     swipeOutBy: string,
     threshold: string,
-    direction?: Direction, // TODO: changed to 1 | -1
+    direction?: Direction, // TODO: changed to 1 | -1 // TODO: Uncomment for direction
 }
 
 const DefaultParameters: DraggableParameters = {
@@ -17,7 +17,7 @@ const DefaultParameters: DraggableParameters = {
     swipeOut: false,
     swipeOutBy: '50%',
     threshold: '5',
-    // direction: null,
+    direction: null, // TODO: Uncomment for direction
 };
 
 type SwipeType = 'horizontal' | 'vertical';
@@ -38,7 +38,7 @@ const Draggable: any = {
             swipeOut,
             swipeOutBy,
             threshold,
-            direction,
+            direction, // TODO: Uncomment for direction
         } = parameters;
 
         let initialX = 0;
@@ -46,9 +46,9 @@ const Draggable: any = {
 
         el.addEventListener('touchstart', function (e: any) {
 
-            if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
-                return;
-            }
+            // if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
+            //     return;
+            // }
 
             const touchObj = e.changedTouches[0];
             el.style.transition = 'none';
@@ -63,6 +63,13 @@ const Draggable: any = {
 
 
         el.addEventListener('touchmove', function (e: any) {
+
+            /*if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
+                detectedScroll = true;
+                return;
+            }*/ // TODO: Uncomment for direction
+
+
             const touchObj = e.changedTouches[0];
             if (detectedScroll) {
                 Log('MOVE: detectedScroll');
@@ -73,16 +80,29 @@ const Draggable: any = {
                 Log('MOVE: shouldSkip');
                 return;
             }
-            detectedScroll = false;
-            if (e.cancelable) e.preventDefault();
+
+            let movedBy: number, newMoveBy: number;
+            if (type === 'horizontal') {
+                movedBy = touchObj.pageX - initialX
+            }
+            else {
+                movedBy = touchObj.pageY - initialY
+            }
+
+            /*if (direction && direction !== 0 && (direction * movedBy) < 0) {
+                detectedScroll = true;
+                return;
+            }*/ // TODO: Uncomment for direction
+            detectedScroll = false; // TODO: CHECK
+
+            if (e.cancelable) e.preventDefault(); // TODO: CHECK
             e.stopPropagation();
             e.stopImmediatePropagation();
+
             requestAnimationFrame(() => {
                 Log('MOVE: translating');
-                let movedBy, newMoveBy
                 if (type === 'horizontal') {
                     /* Horizontal swipe on X */
-                    movedBy = touchObj.pageX - initialX;
                     if (swipeOut && swipeOutBy) {
                         let maxMoveBy = Math.max(GetActualPixels(swipeOutBy, el, type), GetActualPixels(swipeOutThreshold, el, type));
 
@@ -93,7 +113,6 @@ const Draggable: any = {
                     el.style.transform = `translate3d(${Math.sign(movedBy) * newMoveBy}px, 0, 0)`
                 } else {
                     /* vertical swipe on Y */
-                    movedBy = touchObj.pageY - initialY;
                     if (swipeOut && swipeOutBy) {
                         let maxMoveBy = Math.max(GetActualPixels(swipeOutBy, el, type), GetActualPixels(swipeOutThreshold, el, type));
 
@@ -147,8 +166,10 @@ const Draggable: any = {
                     }, 1000)
                 })
             } else if (type === 'vertical' && offset >= GetActualPixels(swipeOutThreshold, el, type)) {
+
+                // TODO: CHECK
                 const event = {direction: touchObj.pageY - initialY > 0 ? 'bottom' : 'up'};
-                Emit(vnode, event, true);
+                Emit(vnode, event/*, true*/); // TODO: CHECK
             } else {
                 Reset(el, backTime);
                 swipedOut = false;
