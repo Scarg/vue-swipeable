@@ -1,0 +1,38 @@
+{
+  "name": "vue-draggable",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Scarg/vue-draggable.git"
+  },
+  "keywords": [],
+  "author": "Artem Martynyuk aka Scarg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Scarg/vue-draggable/issues"
+  },
+  "homepage": "https://github.com/Scarg/vue-draggable#readme",
+  "devDependencies": {
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.4"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "tslint -p tsconfig.json",
+      "git add"
+    ]
+  },
+  "files": [
+    "lib/**/*"
+  ]
+}
