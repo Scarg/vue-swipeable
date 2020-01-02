@@ -1,14 +1,16 @@
 interface DraggableParameters {
   swipeOutThreshold: string;
   backTime: string; // Animation time for the transform 0
-  swipeTime: string;
+  swipeTime: string; // Animation time for the swipe
   type: SwipeType;
   swipeOut: boolean;
   swipeOutBy: string; // IN PIXELS OR PERCENTAGE 5 or 5px become 5 while 50% in a 100px containers becomes 50
   threshold: string; // Minim amount of pixels of movement before a swipe is registered
   allowedDirection: AllowedDirection; // TODO: changed to 1 | -1 // TODO: Uncomment for direction
   debug: boolean;
+  max: string | null;
   // TODO: Add "hold" preference
+  // TODO: Add contemporary swipe to reveal and swipe away
 }
 
 const DefaultParameters: DraggableParameters = {
@@ -21,6 +23,7 @@ const DefaultParameters: DraggableParameters = {
   threshold: '5',
   allowedDirection: null, // TODO: Uncomment for direction
   debug: false,
+  max: null,
 };
 
 type SwipeType = 'horizontal' | 'vertical';
@@ -43,6 +46,7 @@ const Draggable: any = {
             threshold,
             allowedDirection, // TODO: Uncomment for direction
             debug,
+            max,
           } = parameters;
 
     const AllowedDirectionNumber = GetAllowedDirectionSign(allowedDirection);
@@ -53,7 +57,7 @@ const Draggable: any = {
     el.addEventListener('touchstart', (e: any) => {
 
       if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
-          return;
+        return;
       }
 
       const touchObj      = e.changedTouches[0];
@@ -76,8 +80,8 @@ const Draggable: any = {
        * Avoids any movement if the draggable element is (?) TODO
        */
       if (detectedScroll === null && type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
-          detectedScroll = true;
-          return;
+        detectedScroll = true;
+        return;
       }
 
 
@@ -110,8 +114,8 @@ const Draggable: any = {
        * Flagging as a scroll if there was no movement in any allowed direction before
        */
       if (detectedScroll === null && AllowedDirectionNumber !== 0 && (AllowedDirectionNumber * movedBy) < 0) {
-          detectedScroll = true;
-          return;
+        detectedScroll = true;
+        return;
       } // TODO: Describe
       detectedScroll = false; // TODO: CHECK
 
@@ -131,6 +135,10 @@ const Draggable: any = {
                 GetActualPixels(swipeOutThreshold, el, type),
             );
             newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
+          }
+          else if (max) {
+            const maxMoveBy = GetActualPixels(max, el, type);
+            newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
           }
           else {
             newMoveBy = Math.abs(movedBy);
@@ -155,6 +163,10 @@ const Draggable: any = {
                 GetActualPixels(swipeOutThreshold, el, type),
             );
 
+            newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
+          }
+          else if (max) {
+            const maxMoveBy = GetActualPixels(max, el, type);
             newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
           }
           else {
