@@ -6,7 +6,7 @@ interface DraggableParameters {
   swipeOut: boolean;
   swipeOutBy: string;
   threshold: string;
-  direction?: Direction; // TODO: changed to 1 | -1 // TODO: Uncomment for direction
+  allowedDirection: AllowedDirection; // TODO: changed to 1 | -1 // TODO: Uncomment for direction
   debug: boolean;
   // TODO: Add "hold" preference
 }
@@ -19,12 +19,12 @@ const DefaultParameters: DraggableParameters = {
   swipeOut: false,
   swipeOutBy: '50%',
   threshold: '5',
-  direction: null, // TODO: Uncomment for direction
+  allowedDirection: null, // TODO: Uncomment for direction
   debug: false,
 };
 
 type SwipeType = 'horizontal' | 'vertical';
-type Direction = 'top' | 'bottom' | 'left' | 'right' | null;
+type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
 
 const Draggable: any = {
   bind: (el: any, binding: { value: DraggableParameters }, vnode: any) => {
@@ -41,18 +41,20 @@ const Draggable: any = {
             swipeOut,
             swipeOutBy,
             threshold,
-            direction, // TODO: Uncomment for direction
+            allowedDirection, // TODO: Uncomment for direction
             debug,
           } = parameters;
+
+    const AllowedDirectionNumber = GetAllowedDirectionSign(allowedDirection);
 
     let initialX = 0;
     let initialY = 0;
 
     el.addEventListener('touchstart', (e: any) => {
 
-      // if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
-      //     return;
-      // }
+      if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
+          return;
+      }
 
       const touchObj      = e.changedTouches[0];
       el.style.transition = 'none';
@@ -69,10 +71,14 @@ const Draggable: any = {
 
     el.addEventListener('touchmove', (e: any) => {
 
-      /*if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
+
+      /**
+       * Avoids any movement if the draggable element is (?) TODO
+       */
+      if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
           detectedScroll = true;
           return;
-      }*/ // TODO: Uncomment for direction
+      }
 
 
       const touchObj = e.changedTouches[0];
@@ -99,10 +105,10 @@ const Draggable: any = {
         movedBy = touchObj.pageY - initialY;
       }
 
-      /*if (direction && direction !== 0 && (direction * movedBy) < 0) {
+      if (AllowedDirectionNumber !== 0 && (AllowedDirectionNumber * movedBy) < 0) {
           detectedScroll = true;
           return;
-      }*/ // TODO: Uncomment for direction
+      } // TODO: Describe
       detectedScroll = false; // TODO: CHECK
 
       if (e.cancelable) {
@@ -127,11 +133,11 @@ const Draggable: any = {
           }
 
           Log(debug, movedBy, 'movedBy');
-          if (direction === 'right' && movedBy < 0) {
+          if (allowedDirection === 'right' && movedBy < 0) {
             return;
           }
 
-          if (direction === 'left' && movedBy > 0) {
+          if (allowedDirection === 'left' && movedBy > 0) {
             return;
           }
 
@@ -151,11 +157,11 @@ const Draggable: any = {
             newMoveBy = Math.abs(movedBy);
           }
           Log(debug, movedBy, 'movedBy');
-          if (direction === 'bottom' && movedBy < 0) {
+          if (allowedDirection === 'bottom' && movedBy < 0) {
             return;
           }
 
-          if (direction === 'top' && movedBy > 0) {
+          if (allowedDirection === 'top' && movedBy > 0) {
             return;
           }
 
@@ -340,6 +346,18 @@ function Emit(vnode: any, event: any): void {
   }
   else {
     vnode.elm.dispatchEvent(new CustomEvent('swiped', {detail: event}));
+  }
+}
+
+function GetAllowedDirectionSign(direction: AllowedDirection): number {
+  if (!direction) {
+    return 0;
+  }
+  else if (direction === 'top' || direction === 'left') {
+    return -1;
+  }
+  else {
+    return 1;
   }
 }
 
