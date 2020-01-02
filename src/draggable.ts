@@ -220,7 +220,7 @@ const Draggable: any = {
           }
 
           if (hasSwipedAway || hasSwipedOut) {
-            swipedOut = true; // It's not actually needed for the swipeAway logic.
+            swipedOut   = true; // It's not actually needed for the swipeAway logic.
             const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
             Emit(vnode, event, hasSwipedAway);
             Log(debug, 'END: emitting swipe');
@@ -323,12 +323,13 @@ function GetActualPixels(inputValue: string, element: any, type: SwipeType): num
  */
 function Reset(el: any, backTime: number): void {
   el.style.transition = `transform ${backTime}s`;
-  // requestAnimationFrame(() => { // TODO: remove request animation frame
-    el.style.transform = '';
-    setTimeout(() => {
-      el.style.transition = '';
-    }, backTime * 1000);
-  // });
+  el.style.transform  = '';
+  requestAnimationFrame(() => {
+        setTimeout(() => {
+          el.style.transition = '';
+        }, backTime * 1000);
+      }
+  );
 }
 
 /**
@@ -384,9 +385,11 @@ function HandleTransform(el: any, targetPosition: number, swipeTime: number = .5
   else {
     el.style.transform = `translate3d(0, ${actualTargetPosition}px, 0)`;
   }
-  setTimeout(() => {
-    el.style.transition = '';
-  }, resetTime * 1000);
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      el.style.transition = '';
+    }, swipeTime * 1000);
+  });
 }
 
 function HasRendered(): Promise<void> {
