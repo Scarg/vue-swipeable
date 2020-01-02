@@ -48,7 +48,7 @@ const Draggable: any = {
     let initialX = 0;
     let initialY = 0;
 
-    el.addEventListener('touchstart', function(e: any) {
+    el.addEventListener('touchstart', (e: any) => {
 
       // if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
       //     return;
@@ -67,7 +67,7 @@ const Draggable: any = {
     }, false);
 
 
-    el.addEventListener('touchmove', function(e: any) {
+    el.addEventListener('touchmove', (e: any) => {
 
       /*if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * direction < 0)) {
           detectedScroll = true;
@@ -80,13 +80,18 @@ const Draggable: any = {
         Log(debug, 'MOVE: detectedScroll');
         return;
       }
-      if (ShouldSkip(type, touchObj.pageY, initialY, touchObj.pageX, initialX, threshold, debug) && detectedScroll == null) {
+      if (
+          ShouldSkip(type, touchObj.pageY, initialY, touchObj.pageX, initialX, threshold, debug)
+          && detectedScroll == null
+      ) {
         detectedScroll = true;
         Log(debug, 'MOVE: shouldSkip');
         return;
       }
 
-      let movedBy: number, newMoveBy: number;
+      let movedBy: number; // TODO: Explain
+      let newMoveBy: number; // TODO: Explain
+
       if (type === 'horizontal') {
         movedBy = touchObj.pageX - initialX;
       }
@@ -111,8 +116,11 @@ const Draggable: any = {
         if (type === 'horizontal') {
           /* Horizontal swipe on X */
           if (swipeOut && swipeOutBy) {
-            let maxMoveBy = Math.max(GetActualPixels(swipeOutBy, el, type), GetActualPixels(swipeOutThreshold, el, type));
-            newMoveBy     = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
+            const maxMoveBy = Math.max(
+                GetActualPixels(swipeOutBy, el, type),
+                GetActualPixels(swipeOutThreshold, el, type),
+            );
+            newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
           }
           else {
             newMoveBy = Math.abs(movedBy);
@@ -132,7 +140,10 @@ const Draggable: any = {
         else {
           /* vertical swipe on Y */
           if (swipeOut && swipeOutBy) {
-            let maxMoveBy = Math.max(GetActualPixels(swipeOutBy, el, type), GetActualPixels(swipeOutThreshold, el, type));
+            const maxMoveBy = Math.max(
+                GetActualPixels(swipeOutBy, el, type),
+                GetActualPixels(swipeOutThreshold, el, type),
+            );
 
             newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
           }
@@ -154,7 +165,7 @@ const Draggable: any = {
       return false;
     }, false);
 
-    el.addEventListener('touchend', function(e: any) {
+    el.addEventListener('touchend', (e: any) => {
       const touchObj = e.changedTouches[0];
       if (detectedScroll) {
         Log(debug, 'END: detectedscroll');
@@ -164,12 +175,13 @@ const Draggable: any = {
       detectedScroll = null;
       const offset   = Math.abs(type === 'horizontal' ? touchObj.pageX - initialX : touchObj.pageY - initialY);
       if (type === 'horizontal' && Math.abs(touchObj.pageX - initialX) >= +swipeOutThreshold) {
-        el.style.transition = `all ${swipeTime || '.5s'}`; /* UNCOMMENT IF THE VISIBLITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
+        /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
+        el.style.transition = `all ${swipeTime || '.5s'}`;
         requestAnimationFrame(() => {
           if (swipeOut) {
             el.style.transform = `translate3d(${touchObj.pageX - initialX > 0 ? '' : '-'}${swipeOutBy || '90%'}, 0, 0)`;
-            /* UNCOMMENT IF THE VISIBLITY SHOULD BE HANDLED BY THE DIRECTIVE */
-            // el.style.visiblity = 'hidden'
+            /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */
+            // el.style.visibility = 'hidden'
             swipedOut = true;
           }
           else {
@@ -177,7 +189,7 @@ const Draggable: any = {
           }
 
           const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
-          Emit(vnode, event);//emit(vnode, {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'})
+          Emit(vnode, event); // emit(vnode, {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'})
           Log(debug, 'END: emitting swipe');
           setTimeout(() => {
             el.style.transition = '';
@@ -187,12 +199,13 @@ const Draggable: any = {
       else if (type === 'vertical' && offset >= GetActualPixels(swipeOutThreshold, el, type)) {
 
         // CASE 1:
-        el.style.transition = `all ${swipeTime || '.5s'}`; /* UNCOMMENT IF THE VISIBLITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
+        /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
+        el.style.transition = `all ${swipeTime || '.5s'}`;
         requestAnimationFrame(() => {
           if (swipeOut) {
             el.style.transform = `translate3d(0, ${touchObj.pageY - initialY > 0 ? '' : '-'}${swipeOutBy || '90%'}, 0)`;
-            /* UNCOMMENT IF THE VISIBLITY SHOULD BE HANDLED BY THE DIRECTIVE */
-            // el.style.visiblity = 'hidden'
+            /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */
+            // el.style.visibility = 'hidden'
             swipedOut = true;
           }
           else {
