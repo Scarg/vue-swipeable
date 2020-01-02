@@ -1,13 +1,13 @@
 interface DraggableParameters {
-    swipeOutThreshold: string,
-    backTime: string,
-    swipeTime: string,
-    type: SwipeType,
-    swipeOut: boolean,
-    swipeOutBy: string,
-    threshold: string,
-    direction?: Direction, // TODO: changed to 1 | -1 // TODO: Uncomment for direction
-    debug: boolean,
+    swipeOutThreshold: string;
+    backTime: string;
+    swipeTime: string;
+    type: SwipeType;
+    swipeOut: boolean;
+    swipeOutBy: string;
+    threshold: string;
+    direction?: Direction; // TODO: changed to 1 | -1 // TODO: Uncomment for direction
+    debug: boolean;
     // TODO: Add "hold" preference
 }
 
@@ -27,7 +27,7 @@ type SwipeType = 'horizontal' | 'vertical';
 type Direction = 'top' | 'bottom' | 'left' | 'right' | null;
 
 const Draggable: any = {
-    bind: (el: any, binding: {value: DraggableParameters}, vnode: any) => {
+    bind: (el: any, binding: { value: DraggableParameters }, vnode: any) => {
         let detectedScroll: boolean | null = false;
         let swipedOut = false;
 
@@ -88,8 +88,7 @@ const Draggable: any = {
             let movedBy: number, newMoveBy: number;
             if (type === 'horizontal') {
                 movedBy = touchObj.pageX - initialX
-            }
-            else {
+            } else {
                 movedBy = touchObj.pageY - initialY
             }
 
@@ -223,7 +222,7 @@ const Draggable: any = {
  * @param debug
  * @returns {boolean} True if an actual swipe has not been registered
  */
-function ShouldSkip (type: SwipeType, pageY: number, initialY: number, pageX: number, initialX: number, threshold: string, debug: boolean): boolean {
+function ShouldSkip(type: SwipeType, pageY: number, initialY: number, pageX: number, initialX: number, threshold: string, debug: boolean): boolean {
     Log(debug, 'SKIP_CHECK -> ', {...arguments}); // TODO: remove useless debug line
     // if (type === 'horizontal' && Math.abs(pageY - initialY) >= Math.abs(pageX - initialX)) { return true }
     if (type === 'horizontal') {
@@ -240,7 +239,7 @@ function ShouldSkip (type: SwipeType, pageY: number, initialY: number, pageX: nu
  * @param type Type of swipe ('horizontal' or 'vertical')
  * @returns {number} The actual number of pixels
  */
-function GetActualPixels (inputValue: string, element: any, type: SwipeType): number {
+function GetActualPixels(inputValue: string, element: any, type: SwipeType): number {
     let actualValue: number;
     if (inputValue.includes != null) {
         if (inputValue.includes('%')) {
@@ -262,18 +261,19 @@ function GetActualPixels (inputValue: string, element: any, type: SwipeType): nu
 }
 
 /**
- * Reset elements position because the user stopped swiping before the desired swipeOutThreshold or because it's not swiping in the wanted direction
+ * Reset elements position because the user stopped swiping before the desired swipeOutThreshold or because it's not
+ * swiping in the wanted direction
  * @param el Element
  * @param backTime Animation time for the transform 0
  */
-function Reset (el: any, backTime: string): void {
+function Reset(el: any, backTime: string): void {
     el.style.transition = `transform ${backTime || '.5s'}`;
     requestAnimationFrame(() => {
         el.style.transform = '';
         setTimeout(() => {
-            el.style.transition = ''
-        }, 500)
-    })
+            el.style.transition = '';
+        }, 500);
+    });
 }
 
 /**
@@ -282,7 +282,7 @@ function Reset (el: any, backTime: string): void {
  * @param args
  * @constructor
  */
-function Log (debug: boolean,...args: any[]): void {
+function Log(debug: boolean, ...args: any[]): void {
     if (debug) {
         console.log(args);
     }
