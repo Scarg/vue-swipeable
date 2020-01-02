@@ -206,16 +206,12 @@ const Draggable: any = {
       const hasSwipedOut  = offset >= SwipeOutThresholdPixels;
       const hasSwipedAway = offset >= SwipeAwayThresholdPixels;
       if (type === 'horizontal') {
-        /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
         requestAnimationFrame(() => {
           if (swipeAway && hasSwipedAway) {
             HandleTransform(el, SwipeAwayByPixels, swipeTime, backTime, type, touchObj.pageX - initialX > 0);
           }
           else if (swipeOut && hasSwipedOut) {
             HandleTransform(el, SwipeOutByPixels, swipeTime, backTime, type, touchObj.pageX - initialX > 0);
-            /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */
-            // el.style.visibility = 'hidden'
-            // swipedOut = true;
           }
           else {
             Reset(el, backTime);
@@ -232,16 +228,12 @@ const Draggable: any = {
         });
       }
       else if (type === 'vertical') {
-        // CASE 1:
-        /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
         requestAnimationFrame(() => {
           if (swipeAway && hasSwipedAway) {
             HandleTransform(el, SwipeAwayByPixels, swipeTime, backTime, type, touchObj.pageY - initialY > 0);
           }
           if (swipeOut && hasSwipedOut) {
             HandleTransform(el, SwipeOutByPixels, swipeTime, backTime, type, touchObj.pageY - initialY > 0);
-            /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */
-            // el.style.visibility = 'hidden'
             swipedOut = true;
           }
           else {
@@ -283,7 +275,6 @@ function ShouldSkip(
     threshold: number,
     debug: boolean): boolean { // TODO: Fix madman indentation
   Log(debug, 'SKIP_CHECK -> ', {...arguments}); // TODO: remove useless debug line
-  // if (type === 'horizontal' && Math.abs(pageY - initialY) >= Math.abs(pageX - initialX)) { return true }
   if (type === 'horizontal') {
     return Math.abs(pageX - initialX) < threshold;
   }
