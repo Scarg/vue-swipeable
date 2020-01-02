@@ -10,8 +10,8 @@ interface DraggableParameters {
   debug: boolean;
   max: string | null;
   swipeAway: boolean;
-  swipeAwayBy: string;
-  swipeAwayThreshold: string;
+  swipeAwayBy: string; // 5, 5px or 5% => The amount of pixels that the element will be swipedAway
+  swipeAwayThreshold: string; // 5, 5px or 5% || the amount of pixels after which a swipeAway is detected
   // TODO: Add "hold" preference
   // TODO: Add contemporary swipe to reveal and swipe away
 }
@@ -215,7 +215,7 @@ const Draggable: any = {
             HandleTransform(el, SwipeOutByPixels, swipeTime, backTime, type, touchObj.pageX - initialX > 0);
             /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */
             // el.style.visibility = 'hidden'
-            swipedOut = true;
+            // swipedOut = true;
           }
           else {
             Reset(el, backTime);
@@ -224,6 +224,7 @@ const Draggable: any = {
           }
 
           if (hasSwipedAway || hasSwipedOut) {
+            swipedOut = true; // It's not actually needed for the swipeAway logic.
             const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
             Emit(vnode, event, hasSwipedAway);
             Log(debug, 'END: emitting swipe');
@@ -331,12 +332,12 @@ function GetActualPixels(inputValue: string, element: any, type: SwipeType): num
  */
 function Reset(el: any, backTime: number): void {
   el.style.transition = `transform ${backTime}s`;
-  requestAnimationFrame(() => { // TODO: remove request animation frame
+  // requestAnimationFrame(() => { // TODO: remove request animation frame
     el.style.transform = '';
     setTimeout(() => {
       el.style.transition = '';
     }, backTime * 1000);
-  });
+  // });
 }
 
 /**
