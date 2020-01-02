@@ -125,26 +125,27 @@ const Draggable: any = {
       e.stopPropagation();
       e.stopImmediatePropagation();
 
+      if (swipeOut && swipeOutBy) {
+        const maxMoveBy = Math.max(
+            GetActualPixels(swipeOutBy, el, type),
+            GetActualPixels(swipeOutThreshold, el, type),
+        );
+        newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
+      }
+      else if (max) {
+        const maxMoveBy = GetActualPixels(max, el, type);
+        newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
+      }
+      else {
+        newMoveBy = Math.abs(movedBy);
+      }
+
+      Log(debug, movedBy, 'movedBy');
+
       requestAnimationFrame(() => {
         Log(debug, 'MOVE: translating');
         if (type === 'horizontal') {
           /* Horizontal swipe on X */
-          if (swipeOut && swipeOutBy) {
-            const maxMoveBy = Math.max(
-                GetActualPixels(swipeOutBy, el, type),
-                GetActualPixels(swipeOutThreshold, el, type),
-            );
-            newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
-          }
-          else if (max) {
-            const maxMoveBy = GetActualPixels(max, el, type);
-            newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
-          }
-          else {
-            newMoveBy = Math.abs(movedBy);
-          }
-
-          Log(debug, movedBy, 'movedBy');
           if (allowedDirection === 'right' && movedBy < 0) {
             return;
           }
@@ -157,22 +158,6 @@ const Draggable: any = {
         }
         else {
           /* vertical swipe on Y */
-          if (swipeOut && swipeOutBy) {
-            const maxMoveBy = Math.max(
-                GetActualPixels(swipeOutBy, el, type),
-                GetActualPixels(swipeOutThreshold, el, type),
-            );
-
-            newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
-          }
-          else if (max) {
-            const maxMoveBy = GetActualPixels(max, el, type);
-            newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
-          }
-          else {
-            newMoveBy = Math.abs(movedBy);
-          }
-          Log(debug, movedBy, 'movedBy');
           if (allowedDirection === 'bottom' && movedBy < 0) {
             return;
           }
@@ -334,7 +319,7 @@ function Reset(el: any, backTime: string): void {
     el.style.transform = '';
     setTimeout(() => {
       el.style.transition = '';
-    }, 500);
+    }, 500); // TODO: use backTime?
   });
 }
 
