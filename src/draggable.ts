@@ -1,11 +1,11 @@
 interface DraggableParameters {
   swipeOutThreshold: string;
-  backTime: string;
+  backTime: string; // Animation time for the transform 0
   swipeTime: string;
   type: SwipeType;
   swipeOut: boolean;
-  swipeOutBy: string;
-  threshold: string;
+  swipeOutBy: string; // IN PIXELS OR PERCENTAGE 5 or 5px become 5 while 50% in a 100px containers becomes 50
+  threshold: string; // Minim amount of pixels of movement before a swipe is registered
   allowedDirection: AllowedDirection; // TODO: changed to 1 | -1 // TODO: Uncomment for direction
   debug: boolean;
   // TODO: Add "hold" preference
@@ -75,7 +75,7 @@ const Draggable: any = {
       /**
        * Avoids any movement if the draggable element is (?) TODO
        */
-      if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
+      if (detectedScroll === null && type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
           detectedScroll = true;
           return;
       }
@@ -90,7 +90,7 @@ const Draggable: any = {
           ShouldSkip(type, touchObj.pageY, initialY, touchObj.pageX, initialX, threshold, debug)
           && detectedScroll == null
       ) {
-        detectedScroll = true;
+        // detectedScroll = true;
         Log(debug, 'MOVE: shouldSkip');
         return;
       }
@@ -105,7 +105,11 @@ const Draggable: any = {
         movedBy = touchObj.pageY - initialY;
       }
 
-      if (AllowedDirectionNumber !== 0 && (AllowedDirectionNumber * movedBy) < 0) {
+
+      /**
+       * Flagging as a scroll if there was no movement in any allowed direction before
+       */
+      if (detectedScroll === null && AllowedDirectionNumber !== 0 && (AllowedDirectionNumber * movedBy) < 0) {
           detectedScroll = true;
           return;
       } // TODO: Describe
@@ -165,6 +169,9 @@ const Draggable: any = {
             return;
           }
 
+          if (detectedScroll === null) {
+            detectedScroll = false;
+          }
           el.style.transform = `translate3d(0, ${Math.sign(movedBy) * newMoveBy}px, 0)`;
         }
       });
