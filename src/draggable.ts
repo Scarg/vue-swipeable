@@ -5,25 +5,31 @@ interface DraggableParameters {
   type: SwipeType;
   swipeOut: boolean;
   swipeOutBy: string; // IN PIXELS OR PERCENTAGE 5 or 5px become 5 while 50% in a 100px containers becomes 50
-  threshold: string; // Minim amount of pixels of movement before a swipe is registered
+  threshold: number; // Minimum amount of pixels of movement before a swipe is registered
   allowedDirection: AllowedDirection; // TODO: changed to 1 | -1 // TODO: Uncomment for direction
   debug: boolean;
   max: string | null;
+  swipeAway: boolean;
+  swipeAwayBy: string;
+  swipeAwayThreshold: string;
   // TODO: Add "hold" preference
   // TODO: Add contemporary swipe to reveal and swipe away
 }
 
 const DefaultParameters: DraggableParameters = {
-  swipeOutThreshold: '25%',
+  swipeOutThreshold: '25%', // TODO: WON'T WORK
   backTime: '0.5s',
   swipeTime: '0.5s',
   type: 'horizontal',
   swipeOut: false,
   swipeOutBy: '50%',
-  threshold: '5',
+  threshold: 5,
   allowedDirection: null, // TODO: Uncomment for direction
   debug: false,
   max: null,
+  swipeAway: false,
+  swipeAwayBy: '1000%',
+  swipeAwayThreshold: '55%',
 };
 
 type SwipeType = 'horizontal' | 'vertical';
@@ -47,10 +53,17 @@ const Draggable: any = {
             allowedDirection, // TODO: Uncomment for direction
             debug,
             max,
+            swipeAway,
+            swipeAwayBy,
+            swipeAwayThreshold,
           } = parameters;
 
     const AllowedDirectionNumber = GetAllowedDirectionSign(allowedDirection);
 
+    const SwipeOutThresholdPixels = GetActualPixels(swipeOutThreshold, el, type);
+    const SwipeOutByPixels = GetActualPixels(swipeOutBy, el, type);
+    const SwipeAwayThresholdPixels = GetActualPixels(swipeAwayThreshold, el, type);
+    const SwipeAwayByPixels = GetActualPixels(swipeAwayBy, el, type);
     let initialX = 0;
     let initialY = 0;
 
@@ -127,9 +140,14 @@ const Draggable: any = {
 
       if (swipeOut && swipeOutBy) {
         const maxMoveBy = Math.max(
-            GetActualPixels(swipeOutBy, el, type),
-            GetActualPixels(swipeOutThreshold, el, type),
+            SwipeOutByPixels,
+            SwipeOutThresholdPixels,
+            swipeAway ? SwipeAwayByPixels : 0,
         );
+        newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
+      }
+      else if (swipeAway) {
+        const maxMoveBy = GetActualPixels(swipeAwayBy, el, type);
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else if (max) {
@@ -184,12 +202,17 @@ const Draggable: any = {
       }
       detectedScroll = null;
       const offset   = Math.abs(type === 'horizontal' ? touchObj.pageX - initialX : touchObj.pageY - initialY);
-      if (type === 'horizontal' && Math.abs(touchObj.pageX - initialX) >= +swipeOutThreshold) {
+      const hasSwipedOut = offset >= SwipeOutThresholdPixels;
+      const hasSwipedAway = offset >= SwipeAwayThresholdPixels;
+      if (type === 'horizontal') {
         /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
         el.style.transition = `all ${swipeTime || '.5s'}`;
         requestAnimationFrame(() => {
-          if (swipeOut) {
-            el.style.transform = `translate3d(${touchObj.pageX - initialX > 0 ? '' : '-'}${swipeOutBy || '90%'}, 0, 0)`;
+          if (swipeAway && hasSwipedAway) {
+            el.style.transform = `translate3d(${touchObj.pageX - initialX > 0 ? '' : '-'}${SwipeAwayByPixels || '90%'}, 0, 0)`; // TODO: replace or with defaults
+          }
+          else if (swipeOut && hasSwipedOut) {
+            el.style.transform = `translate3d(${touchObj.pageX - initialX > 0 ? '' : '-'}${SwipeOutByPixels || '90%'}, 0, 0)`; // TODO: replace or with default
             /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */
             // el.style.visibility = 'hidden'
             swipedOut = true;
@@ -198,48 +221,49 @@ const Draggable: any = {
             el.style.transform = '';
           }
 
-          const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
-          Emit(vnode, event); // emit(vnode, {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'})
-          Log(debug, 'END: emitting swipe');
+          if (hasSwipedAway || hasSwipedOut) {
+            const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
+            Emit(vnode, event, hasSwipedAway);
+            Log(debug, 'END: emitting swipe');
+          }
+
           setTimeout(() => {
             el.style.transition = '';
-          }, 1000);
+          }, 1000); // TODO: proper timing handling
         });
       }
-      else if (type === 'vertical' && offset >= GetActualPixels(swipeOutThreshold, el, type)) {
+      else if (type === 'vertical') {
 
         // CASE 1:
         /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */ // , visibility ${swipeTime || '.5s'}
-        el.style.transition = `all ${swipeTime || '.5s'}`;
         requestAnimationFrame(() => {
-          if (swipeOut) {
-            el.style.transform = `translate3d(0, ${touchObj.pageY - initialY > 0 ? '' : '-'}${swipeOutBy || '90%'}, 0)`;
+          el.style.transition = `all ${swipeTime || '.5s'}`;
+          if (swipeAway && hasSwipedAway) {
+            el.style.transform = `translate3d(0, ${touchObj.pageY - initialY > 0 ? '' : '-'}${SwipeAwayByPixels || '90%'}, 0)`;
+          }
+          if (swipeOut && hasSwipedOut) {
+            el.style.transform = `translate3d(0, ${touchObj.pageY - initialY > 0 ? '' : '-'}${SwipeOutByPixels || '90%'}, 0)`;
             /* UNCOMMENT IF THE VISIBILITY SHOULD BE HANDLED BY THE DIRECTIVE */
             // el.style.visibility = 'hidden'
             swipedOut = true;
           }
           else {
+            Reset(el, backTime);
+            swipedOut = false;
+            Log(debug, 'END: resettings');
             el.style.transform = '';
           }
 
-          const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
+          if (hasSwipedAway || hasSwipedOut) {
+            const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
+            Emit(vnode, event, hasSwipedAway);
+            Log(debug, 'END: emitting swipe');
+          }
 
-          Emit(vnode, event);
-          Log(debug, 'END: emitting swipe');
           setTimeout(() => {
             el.style.transition = '';
           }, 1000); // TODO: Replace with proper timing handling
         });
-
-
-        // TODO: CHECK
-        // const event = {direction: touchObj.pageY - initialY > 0 ? 'bottom' : 'up'};
-        // Emit(vnode, event/*, true*/); // TODO: CHECK
-      }
-      else {
-        Reset(el, backTime);
-        swipedOut = false;
-        Log(debug, 'END: resettings');
       }
     }, false);
   },
@@ -263,15 +287,15 @@ function ShouldSkip(
     initialY: number,
     pageX: number,
     initialX: number,
-    threshold: string,
+    threshold: number,
     debug: boolean): boolean { // TODO: Fix madman indentation
   Log(debug, 'SKIP_CHECK -> ', {...arguments}); // TODO: remove useless debug line
   // if (type === 'horizontal' && Math.abs(pageY - initialY) >= Math.abs(pageX - initialX)) { return true }
   if (type === 'horizontal') {
-    return Math.abs(pageX - initialX) < +threshold;
+    return Math.abs(pageX - initialX) < threshold;
   }
   else {
-    return Math.abs(pageY - initialY) < +threshold;
+    return Math.abs(pageY - initialY) < threshold;
   }
 }
 
@@ -340,16 +364,18 @@ function Log(debug: boolean, ...args: any[]): void {
  * on the vnode is not available
  * @param vnode
  * @param event
+ * @param hasSwipedAway
  * @constructor
  */
 
-function Emit(vnode: any, event: any): void {
-  vnode.context.$emit(`swiped`, event);
+function Emit(vnode: any, event: any, hasSwipedAway: boolean = false): void {
+  const eventName = hasSwipedAway ? 'swiped-away': 'swiped';
+  vnode.context.$emit(eventName, event);
   if (vnode.componentInstance) {
-    vnode.componentInstance.$emit('swiped', event); // use {detail:} to be uniform
+    vnode.componentInstance.$emit(eventName, event); // use {detail:} to be uniform
   }
   else {
-    vnode.elm.dispatchEvent(new CustomEvent('swiped', {detail: event}));
+    vnode.elm.dispatchEvent(new CustomEvent(eventName, {detail: event}));
   }
 }
 
@@ -363,6 +389,19 @@ function GetAllowedDirectionSign(direction: AllowedDirection): number {
   else {
     return 1;
   }
+}
+
+function HandleTransform(el: any, targetPosition: string, swipeTime: number = .5, resetTime: number, type: SwipeType) {
+  el.style.transition = `all ${swipeTime}s`;
+  if (type == 'horizontal') {
+    el.style.transform = `translate3d(${targetPosition}, 0, 0)`;
+  }
+  else {
+    el.style.transform = `translate3d(0, ${targetPosition}, 0)`;
+  }
+  setTimeout(() => {
+    el.style.transition = '';
+  }, resetTime);
 }
 
 export default Draggable;
