@@ -7,6 +7,8 @@ interface DraggableParameters {
     swipeOutBy: string,
     threshold: string,
     direction?: Direction, // TODO: changed to 1 | -1 // TODO: Uncomment for direction
+    debug: boolean,
+    // TODO: Add "hold" preference
 }
 
 const DefaultParameters: DraggableParameters = {
@@ -18,6 +20,7 @@ const DefaultParameters: DraggableParameters = {
     swipeOutBy: '50%',
     threshold: '5',
     direction: null, // TODO: Uncomment for direction
+    debug: false,
 };
 
 type SwipeType = 'horizontal' | 'vertical';
@@ -39,6 +42,7 @@ const Draggable: any = {
             swipeOutBy,
             threshold,
             direction, // TODO: Uncomment for direction
+            debug,
         } = parameters;
 
         let initialX = 0;
@@ -55,9 +59,9 @@ const Draggable: any = {
             if (!swipedOut) {
                 initialX = touchObj.pageX;
                 initialY = touchObj.pageY;
-                Log('START: starting', initialX, initialY);
+                Log(debug, 'START: starting', initialX, initialY);
             } else {
-                Log('START: starting (ALREADY OPEN)');
+                Log(debug, 'START: starting (ALREADY OPEN)');
             }
         }, false);
 
@@ -72,12 +76,12 @@ const Draggable: any = {
 
             const touchObj = e.changedTouches[0];
             if (detectedScroll) {
-                Log('MOVE: detectedScroll');
+                Log(debug, 'MOVE: detectedScroll');
                 return;
             }
-            if (ShouldSkip(type, touchObj.pageY, initialY, touchObj.pageX, initialX, threshold) && detectedScroll == null) {
+            if (ShouldSkip(type, touchObj.pageY, initialY, touchObj.pageX, initialX, threshold, debug) && detectedScroll == null) {
                 detectedScroll = true;
-                Log('MOVE: shouldSkip');
+                Log(debug, 'MOVE: shouldSkip');
                 return;
             }
 
@@ -100,16 +104,21 @@ const Draggable: any = {
             e.stopImmediatePropagation();
 
             requestAnimationFrame(() => {
-                Log('MOVE: translating');
+                Log(debug, 'MOVE: translating');
                 if (type === 'horizontal') {
                     /* Horizontal swipe on X */
                     if (swipeOut && swipeOutBy) {
                         let maxMoveBy = Math.max(GetActualPixels(swipeOutBy, el, type), GetActualPixels(swipeOutThreshold, el, type));
-
                         newMoveBy = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy)
                     } else {
                         newMoveBy = Math.abs(movedBy)
                     }
+
+                    Log(debug, movedBy, 'movedBy');
+                    if (direction === 'right' && movedBy < 0) return;
+
+                    if (direction === 'left' && movedBy > 0) return;
+
                     el.style.transform = `translate3d(${Math.sign(movedBy) * newMoveBy}px, 0, 0)`
                 } else {
                     /* vertical swipe on Y */
@@ -120,7 +129,7 @@ const Draggable: any = {
                     } else {
                         newMoveBy = Math.abs(movedBy)
                     }
-                    console.log(movedBy, 'movedBy')
+                    Log(debug, movedBy, 'movedBy');
                     if (direction === 'bottom' && movedBy < 0) return;
 
                     if (direction === 'top' && movedBy > 0) return;
@@ -134,7 +143,7 @@ const Draggable: any = {
         el.addEventListener('touchend', function (e: any) {
             const touchObj = e.changedTouches[0];
             if (detectedScroll) {
-                Log('END: detectedscroll');
+                Log(debug, 'END: detectedscroll');
                 detectedScroll = null;
                 return
             }
@@ -160,20 +169,43 @@ const Draggable: any = {
                         vnode.elm.dispatchEvent(new CustomEvent('swiped', {detail: {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'}}));
                     }
                     //emit(vnode, {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'})
-                    Log('END: emitting swipe');
+                    Log(debug, 'END: emitting swipe');
                     setTimeout(() => {
                         el.style.transition = ''
                     }, 1000)
                 })
             } else if (type === 'vertical' && offset >= GetActualPixels(swipeOutThreshold, el, type)) {
 
+                // CASE 1:
+                el.style.transition = `all ${swipeTime || '.5s'}`; /* UNCOMMENT IF THE VISIBLITY SHOULD BE HANDLED BY THE DIRECTIVE */ //, visibility ${swipeTime || '.5s'}
+                requestAnimationFrame(() => {
+                    if (swipeOut) {
+                        el.style.transform = `translate3d(0, ${touchObj.pageY - initialY > 0 ? '' : '-'}${swipeOutBy || '90%'}, 0)`;
+                        /* UNCOMMENT IF THE VISIBLITY SHOULD BE HANDLED BY THE DIRECTIVE */
+                        // el.style.visiblity = 'hidden'
+                        swipedOut = true
+                    } else {
+                        el.style.transform = ''
+                    }
+
+                    const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
+
+                    Emit(vnode, event);
+
+                    Log(debug, 'END: emitting swipe');
+                    setTimeout(() => {
+                        el.style.transition = ''
+                    }, 1000) //TODO: Replace with proper timing handling
+                })
+
+
                 // TODO: CHECK
-                const event = {direction: touchObj.pageY - initialY > 0 ? 'bottom' : 'up'};
-                Emit(vnode, event/*, true*/); // TODO: CHECK
+                // const event = {direction: touchObj.pageY - initialY > 0 ? 'bottom' : 'up'};
+                // Emit(vnode, event/*, true*/); // TODO: CHECK
             } else {
                 Reset(el, backTime);
                 swipedOut = false;
-                Log('END: resettings');
+                Log(debug, 'END: resettings');
             }
         }, false);
     }
@@ -188,10 +220,11 @@ const Draggable: any = {
  * @param pageX
  * @param initialX
  * @param threshold Minim amount of pixels of movement before a swipe is registered
+ * @param debug
  * @returns {boolean} True if an actual swipe has not been registered
  */
-function ShouldSkip (type: SwipeType, pageY: number, initialY: number, pageX: number, initialX: number, threshold: string): boolean {
-    Log('SKIP_CHECK -> ', {...arguments});
+function ShouldSkip (type: SwipeType, pageY: number, initialY: number, pageX: number, initialX: number, threshold: string, debug: boolean): boolean {
+    Log(debug, 'SKIP_CHECK -> ', {...arguments}); // TODO: remove useless debug line
     // if (type === 'horizontal' && Math.abs(pageY - initialY) >= Math.abs(pageX - initialX)) { return true }
     if (type === 'horizontal') {
         return Math.abs(pageX - initialX) < +threshold;
@@ -243,9 +276,25 @@ function Reset (el: any, backTime: string): void {
     })
 }
 
-function Log (...args: any[]): void {
-    console.log(args);
+/**
+ * Just a dumb shorthand for Logs;
+ * @param debug
+ * @param args
+ * @constructor
+ */
+function Log (debug: boolean,...args: any[]): void {
+    if (debug) {
+        console.log(args);
+    }
 }
+
+/**
+ * Emits the event using the proper method falling back to the dom's default CustomEvent when a componentInstance
+ * on the vnode is not available
+ * @param vnode
+ * @param event
+ * @constructor
+ */
 
 function Emit(vnode: any, event: any): void {
     vnode.context.$emit(`swiped`, event);
@@ -255,3 +304,5 @@ function Emit(vnode: any, event: any): void {
         vnode.elm.dispatchEvent(new CustomEvent('swiped', {detail: event}));
     }
 }
+
+export default Draggable;
