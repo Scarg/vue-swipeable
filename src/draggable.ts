@@ -32,7 +32,7 @@ const DefaultParameters: DraggableParameters = {
   swipeAwayThreshold: '55%',
 };
 
-type SwipeType = 'horizontal' | 'vertical';
+type SwipeType = 'horizontal' | 'vertical'; //TODO: add 'any'
 type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
 
 const Draggable: any = {
