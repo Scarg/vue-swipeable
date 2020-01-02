@@ -36,7 +36,8 @@ type SwipeType = 'horizontal' | 'vertical';
 type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
 
 const Draggable: any = {
-  bind: (el: any, binding: { value: DraggableParameters }, vnode: any) => {
+  bind: async (el: any, binding: { value: DraggableParameters }, vnode: any) => {
+    await HasRendered();
     let detectedScroll: boolean | null = false;
     let swipedOut                      = false;
 
@@ -138,16 +139,16 @@ const Draggable: any = {
       e.stopPropagation();
       e.stopImmediatePropagation();
 
-      if (swipeOut && swipeOutBy) {
+      if (swipeAway) {
+        const maxMoveBy = GetActualPixels(swipeAwayBy, el, type);
+        newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
+      }
+      else if (swipeOut) {
         const maxMoveBy = Math.max(
             SwipeOutByPixels,
             SwipeOutThresholdPixels,
             swipeAway ? SwipeAwayByPixels : 0,
         );
-        newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
-      }
-      else if (swipeAway) {
-        const maxMoveBy = GetActualPixels(swipeAwayBy, el, type);
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else if (max) {
@@ -217,7 +218,9 @@ const Draggable: any = {
             swipedOut = true;
           }
           else {
-            el.style.transform = '';
+            Reset(el, backTime);
+            swipedOut = false;
+            Log(debug, 'END: resettings');
           }
 
           if (hasSwipedAway || hasSwipedOut) {
@@ -328,7 +331,7 @@ function GetActualPixels(inputValue: string, element: any, type: SwipeType): num
  */
 function Reset(el: any, backTime: number): void {
   el.style.transition = `transform ${backTime}s`;
-  requestAnimationFrame(() => {
+  requestAnimationFrame(() => { // TODO: remove request animation frame
     el.style.transform = '';
     setTimeout(() => {
       el.style.transition = '';
@@ -381,7 +384,7 @@ function GetAllowedDirectionSign(direction: AllowedDirection): number {
 }
 
 function HandleTransform(el: any, targetPosition: number, swipeTime: number = .5, resetTime: number, type: SwipeType, sign: boolean) {
-  const actualTargetPosition = (sign ? 1 : 1) * targetPosition;
+  const actualTargetPosition = (sign ? 1 : -1) * targetPosition;
   el.style.transition        = `all ${swipeTime}s`;
   if (type == 'horizontal') {
     el.style.transform = `translate3d(${actualTargetPosition}px, 0, 0)`;
@@ -392,6 +395,14 @@ function HandleTransform(el: any, targetPosition: number, swipeTime: number = .5
   setTimeout(() => {
     el.style.transition = '';
   }, resetTime * 1000);
+}
+
+function HasRendered(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
 }
 
 export default Draggable;
