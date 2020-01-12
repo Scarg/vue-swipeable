@@ -1,5 +1,5 @@
 {
-  "name": "vue-draggable",
+  "name": "vue-swipeable",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -34,6 +34,5 @@
   },
   "files": [
     "lib/**/*"
-  ],
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
+  ]
 }
