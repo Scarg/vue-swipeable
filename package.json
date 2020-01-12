@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Scarg/vue-draggable.git"
+    "url": "git+https://github.com/Scarg/vue-swipeable.git"
   },
   "keywords": [],
   "author": "Artem Martynyuk aka Scarg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Scarg/vue-draggable/issues"
+    "url": "https://github.com/Scarg/vue-swipeable/issues"
   },
-  "homepage": "https://github.com/Scarg/vue-draggable#readme",
+  "homepage": "https://github.fcom/Scarg/vue-swipeable#readme",
   "devDependencies": {
     "tslint": "^5.20.1",
     "typescript": "^3.7.4"
@@ -34,5 +34,6 @@
   },
   "files": [
     "lib/**/*"
-  ]
+  ],
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
 }
