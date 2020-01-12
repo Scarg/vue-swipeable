@@ -22,10 +22,6 @@ export interface DirectiveParameters {
   // TODO: Add "hold" preference
 }
 
-export class DirectiveParametersWithDefaults implements DirectiveParameters {
-
-}
-
 export interface SwipeableDirective extends DirectiveOptions {
   bind: SwipeableFunction & DirectiveFunction,
 }
