@@ -1,4 +1,5 @@
 import { DirectiveOptions, DirectiveBinding, DirectiveFunction } from 'vue/types/options'
+import { VNode } from 'vue/types/vnode'
 
 export type SwipeType = 'horizontal' | 'vertical'; //TODO: add 'any'
 
@@ -22,17 +23,26 @@ export interface DraggableParameters {
 }
 
 export interface SwipeableDirective extends DirectiveOptions {
-  bind: ExtendedSwipeableFunction,
+  bind: ExtendedSwipeableFunction & DirectiveFunction,
 }
 
 export interface SwipeableDirectiveBinding extends DirectiveBinding {
- readonly value: DraggableParameters
+ readonly value?: DraggableParameters
 }
 
 type SwipeableFunction = (
-  binding: SwipeableDirectiveBinding
+  el: HTMLElement,
+  binding: SwipeableDirectiveBinding,
+  vnode: VNode,
+  oldVnode: VNode
 ) => Promise<void>;
 
-type ExtendedSwipeableFunction = SwipeableFunction & DirectiveFunction;
+type ExtendedSwipeableFunction = SwipeableFunction;
 
 
+
+const Swipeable: SwipeableDirective = {
+  bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode, oldVnode: VNode): Promise<void> => {
+
+  }
+}
