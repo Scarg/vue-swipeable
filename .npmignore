@@ -1,5 +1,4 @@
 .idea
 /lib
-/dist
 node_modules
 tmp
