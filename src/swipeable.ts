@@ -1,7 +1,7 @@
-import {DraggableParameters, SwipeableDirective, AllowedDirection, SwipeType, SwipeableDirectiveBinding} from './types';
+import {DirectiveParameters, SwipeableDirective, AllowedDirection, SwipeType, SwipeableDirectiveBinding} from './types';
 import {VNode}                                                                                           from 'vue/types/vnode';
 
-const DefaultParameters: DraggableParameters = {
+const DefaultParameters: DirectiveParameters = {
   swipeOutThreshold: '25%', // TODO: WON'T WORK
   backTime: .5,
   swipeTime: .5,
@@ -41,12 +41,12 @@ const Swipeable: SwipeableDirective = {
             swipeAwayThreshold,
           } = parameters;
 
-    const AllowedDirectionNumber = GetAllowedDirectionSign(allowedDirection);
+    const AllowedDirectionNumber = GetAllowedDirectionSign(<"top" | "bottom" | "left" | "right" | null> allowedDirection);
 
-    const SwipeOutThresholdPixels  = GetActualPixels(swipeOutThreshold, el, type);
-    const SwipeOutByPixels         = GetActualPixels(swipeOutBy, el, type);
-    const SwipeAwayThresholdPixels = GetActualPixels(swipeAwayThreshold, el, type);
-    const SwipeAwayByPixels        = GetActualPixels(swipeAwayBy, el, type);
+    const SwipeOutThresholdPixels  = GetActualPixels(<string> swipeOutThreshold, el, <"horizontal" | "vertical"> type);
+    const SwipeOutByPixels         = GetActualPixels(<string> swipeOutBy, el, <"horizontal" | "vertical"> type);
+    const SwipeAwayThresholdPixels = GetActualPixels(<string> swipeAwayThreshold, el, <"horizontal" | "vertical"> type);
+    const SwipeAwayByPixels        = GetActualPixels(<string> swipeAwayBy, el, <"horizontal" | "vertical"> type);
     let initialX                   = 0;
     let initialY                   = 0;
 
@@ -61,10 +61,10 @@ const Swipeable: SwipeableDirective = {
       if (!swipedOut) {
         initialX = touchObj.pageX;
         initialY = touchObj.pageY;
-        Log(debug, 'START: starting', initialX, initialY);
+        Log(<boolean> debug, 'START: starting', initialX, initialY);
       }
       else {
-        Log(debug, 'START: starting (ALREADY OPEN)');
+        Log(<boolean> debug, 'START: starting (ALREADY OPEN)');
       }
     }, false);
 
@@ -83,15 +83,15 @@ const Swipeable: SwipeableDirective = {
 
       const touchObj = e.changedTouches[0];
       if (detectedScroll) {
-        Log(debug, 'MOVE: detectedScroll');
+        Log(<boolean> debug, 'MOVE: detectedScroll');
         return;
       }
       if (
-          ShouldSkip(type, touchObj.pageY, initialY, touchObj.pageX, initialX, threshold, debug)
+          ShouldSkip(<"horizontal" | "vertical"> type, touchObj.pageY, initialY, touchObj.pageX, initialX, <number> threshold, <boolean> debug)
           && detectedScroll == null
       ) {
         // detectedScroll = true;
-        Log(debug, 'MOVE: shouldSkip');
+        Log(<boolean> debug, 'MOVE: shouldSkip');
         return;
       }
 
@@ -122,7 +122,7 @@ const Swipeable: SwipeableDirective = {
       e.stopImmediatePropagation();
 
       if (swipeAway) {
-        const maxMoveBy = GetActualPixels(swipeAwayBy, el, type);
+        const maxMoveBy = GetActualPixels(<string> swipeAwayBy, el, <"horizontal" | "vertical"> type);
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else if (swipeOut) {
@@ -134,17 +134,17 @@ const Swipeable: SwipeableDirective = {
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else if (max) {
-        const maxMoveBy = GetActualPixels(max, el, type);
+        const maxMoveBy = GetActualPixels(max, el, <"horizontal" | "vertical"> type);
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else {
         newMoveBy = Math.abs(movedBy);
       }
 
-      Log(debug, movedBy, 'movedBy');
+      Log(<boolean> debug, movedBy, 'movedBy');
 
       requestAnimationFrame(() => {
-        Log(debug, 'MOVE: translating');
+        Log(<boolean> debug, 'MOVE: translating');
         if (type === 'horizontal') {
           /* Horizontal swipe on X */
           if (allowedDirection === 'right' && movedBy < 0) {
@@ -179,7 +179,7 @@ const Swipeable: SwipeableDirective = {
     el.addEventListener('touchend', (e: any) => {
       const touchObj = e.changedTouches[0];
       if (detectedScroll) {
-        Log(debug, 'END: detectedscroll');
+        Log(<boolean> debug, 'END: detectedscroll');
         detectedScroll = null;
         return;
       }
@@ -190,44 +190,44 @@ const Swipeable: SwipeableDirective = {
       if (type === 'horizontal') {
         requestAnimationFrame(() => {
           if (swipeAway && hasSwipedAway) {
-            HandleTransform(el, SwipeAwayByPixels, swipeTime, backTime, type, touchObj.pageX - initialX > 0);
+            HandleTransform(el, SwipeAwayByPixels, swipeTime, <number> backTime, type, touchObj.pageX - initialX > 0);
           }
           else if (swipeOut && hasSwipedOut) {
-            HandleTransform(el, SwipeOutByPixels, swipeTime, backTime, type, touchObj.pageX - initialX > 0);
+            HandleTransform(el, SwipeOutByPixels, swipeTime, <number> backTime, type, touchObj.pageX - initialX > 0);
           }
           else {
-            Reset(el, backTime);
+            Reset(el, <number> backTime);
             swipedOut = false;
-            Log(debug, 'END: resettings');
+            Log(<boolean> debug, 'END: resettings');
           }
 
           if (hasSwipedAway || hasSwipedOut) {
             swipedOut   = true; // It's not actually needed for the swipeAway logic.
             const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
             Emit(vnode, event, hasSwipedAway);
-            Log(debug, 'END: emitting swipe');
+            Log(<boolean> debug, 'END: emitting swipe');
           }
         });
       }
       else if (type === 'vertical') {
         requestAnimationFrame(() => {
           if (swipeAway && hasSwipedAway) {
-            HandleTransform(el, SwipeAwayByPixels, swipeTime, backTime, type, touchObj.pageY - initialY > 0);
+            HandleTransform(el, SwipeAwayByPixels, swipeTime, <number> backTime, type, touchObj.pageY - initialY > 0);
           }
           if (swipeOut && hasSwipedOut) {
-            HandleTransform(el, SwipeOutByPixels, swipeTime, backTime, type, touchObj.pageY - initialY > 0);
+            HandleTransform(el, SwipeOutByPixels, swipeTime, <number> backTime, type, touchObj.pageY - initialY > 0);
             swipedOut = true;
           }
           else {
-            Reset(el, backTime);
+            Reset(el, <number> backTime);
             swipedOut = false;
-            Log(debug, 'END: resettings');
+            Log(<boolean> debug, 'END: resettings');
           }
 
           if (hasSwipedAway || hasSwipedOut) {
             const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
             Emit(vnode, event, hasSwipedAway);
-            Log(debug, 'END: emitting swipe');
+            Log(<boolean> debug, 'END: emitting swipe');
           }
 
         });
