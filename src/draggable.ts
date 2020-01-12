@@ -6,14 +6,13 @@ interface DraggableParameters {
   swipeOut: boolean;
   swipeOutBy: string; // IN PIXELS OR PERCENTAGE 5 or 5px become 5 while 50% in a 100px containers becomes 50
   threshold: number; // Minimum amount of pixels of movement before a swipe is registered
-  allowedDirection: AllowedDirection; // TODO: changed to 1 | -1 // TODO: Uncomment for direction
+  allowedDirection: AllowedDirection;
   debug: boolean;
   max: string | null;
   swipeAway: boolean;
   swipeAwayBy: string; // 5, 5px or 5% => The amount of pixels that the element will be swipedAway
   swipeAwayThreshold: string; // 5, 5px or 5% || the amount of pixels after which a swipeAway is detected
   // TODO: Add "hold" preference
-  // TODO: Add contemporary swipe to reveal and swipe away
 }
 
 const DefaultParameters: DraggableParameters = {
@@ -24,7 +23,7 @@ const DefaultParameters: DraggableParameters = {
   swipeOut: false,
   swipeOutBy: '50%',
   threshold: 5,
-  allowedDirection: null, // TODO: Uncomment for direction
+  allowedDirection: null,
   debug: false,
   max: null,
   swipeAway: false,
@@ -37,7 +36,7 @@ type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
 
 const Draggable: any = {
   bind: async (el: any, binding: { value: DraggableParameters }, vnode: any) => {
-    await HasRendered();
+    await HasRendered(); // Ensures that bindings have been evaluated
     let detectedScroll: boolean | null = false;
     let swipedOut                      = false;
 
@@ -51,7 +50,7 @@ const Draggable: any = {
             swipeOut,
             swipeOutBy,
             threshold,
-            allowedDirection, // TODO: Uncomment for direction
+            allowedDirection,
             debug,
             max,
             swipeAway,
@@ -91,7 +90,7 @@ const Draggable: any = {
 
 
       /**
-       * Avoids any movement if the draggable element is (?) TODO
+       * Avoids any movement if the draggable element is (?) TODO: Test
        */
       if (detectedScroll === null && type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
         detectedScroll = true;
@@ -392,6 +391,10 @@ function HandleTransform(el: any, targetPosition: number, swipeTime: number = .5
   });
 }
 
+/**
+ * Creates a promises that will be resolved after the first rendered frame
+ * @constructor
+ */
 function HasRendered(): Promise<void> {
   return new Promise((resolve) => {
     requestAnimationFrame(() => {

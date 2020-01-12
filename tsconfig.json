@@ -3,10 +3,11 @@
     "lib": [
       "es6",
       "es2017",
-      "dom"
+      "dom",
+      "es5"
     ],
     "target": "es5",
-    "module": "commonjs",
+    "module": "es6",
     "declaration": true,
     "outDir": "./lib",
     "strict": true
