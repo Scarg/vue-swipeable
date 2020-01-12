@@ -1,4 +1,6 @@
-import {DraggableParameters, SwipeableDirective, AllowedDirection, SwipeType} from './types';
+import {DraggableParameters, SwipeableDirective, AllowedDirection, SwipeType, SwipeableDirectiveBinding} from './types';
+import { DirectiveOptions }                                                                                                 from 'vue'
+import { VNode }                                                                                                            from 'vue/types/vnode'
 
 const DefaultParameters: DraggableParameters = {
   swipeOutThreshold: '25%', // TODO: WON'T WORK
@@ -17,7 +19,8 @@ const DefaultParameters: DraggableParameters = {
 };
 
 const Swipeable: SwipeableDirective = {
-  bind: async (el: any, binding: { value: DraggableParameters }, vnode: any) : Promise<void> => {
+  bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode,
+               oldVnode: VNode) : Promise<void> => {
     await HasRendered(); // Ensures that bindings have been evaluated
     let detectedScroll: boolean | null = false;
     let swipedOut                      = false;

@@ -1,3 +1,5 @@
+import { DirectiveOptions, DirectiveBinding, DirectiveFunction } from 'vue/types/options'
+
 export type SwipeType = 'horizontal' | 'vertical'; //TODO: add 'any'
 
 export type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
@@ -19,6 +21,18 @@ export interface DraggableParameters {
   // TODO: Add "hold" preference
 }
 
-export interface SwipeableDirective {
-  bind(el: any, binding: { value: DraggableParameters }, vnode: any) : Promise<void>,
+export interface SwipeableDirective extends DirectiveOptions {
+  bind: ExtendedSwipeableFunction,
 }
+
+export interface SwipeableDirectiveBinding extends DirectiveBinding {
+ readonly value: DraggableParameters
+}
+
+type SwipeableFunction = (
+  binding: SwipeableDirectiveBinding
+) => Promise<void>;
+
+type ExtendedSwipeableFunction = SwipeableFunction & DirectiveFunction;
+
+
