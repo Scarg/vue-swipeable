@@ -23,7 +23,7 @@ export interface DraggableParameters {
 }
 
 export interface SwipeableDirective extends DirectiveOptions {
-  bind: ExtendedSwipeableFunction & DirectiveFunction,
+  bind: SwipeableFunction & DirectiveFunction,
 }
 
 export interface SwipeableDirectiveBinding extends DirectiveBinding {
@@ -36,13 +36,3 @@ type SwipeableFunction = (
   vnode: VNode,
   oldVnode: VNode
 ) => Promise<void>;
-
-type ExtendedSwipeableFunction = SwipeableFunction;
-
-
-
-const Swipeable: SwipeableDirective = {
-  bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode, oldVnode: VNode): Promise<void> => {
-
-  }
-}

@@ -1,6 +1,5 @@
 import {DraggableParameters, SwipeableDirective, AllowedDirection, SwipeType, SwipeableDirectiveBinding} from './types';
-import { DirectiveOptions }                                                                                                 from 'vue'
-import { VNode }                                                                                                            from 'vue/types/vnode'
+import {VNode}                                                                                           from 'vue/types/vnode';
 
 const DefaultParameters: DraggableParameters = {
   swipeOutThreshold: '25%', // TODO: WON'T WORK
@@ -19,8 +18,7 @@ const DefaultParameters: DraggableParameters = {
 };
 
 const Swipeable: SwipeableDirective = {
-  bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode,
-               oldVnode: VNode) : Promise<void> => {
+  bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode): Promise<void> => {
     await HasRendered(); // Ensures that bindings have been evaluated
     let detectedScroll: boolean | null = false;
     let swipedOut                      = false;
@@ -59,7 +57,7 @@ const Swipeable: SwipeableDirective = {
         return;
       }
 
-      const touchObj      = e.changedTouches[0];
+      const touchObj = e.changedTouches[0];
       if (!swipedOut) {
         initialX = touchObj.pageX;
         initialY = touchObj.pageY;
@@ -305,7 +303,7 @@ function GetActualPixels(inputValue: string, element: any, type: SwipeType): num
  * @param el Element
  * @param backTime Animation time for the transform 0
  */
-function Reset(el: any, backTime: number): void {
+function Reset(el: HTMLElement, backTime: number): void {
   el.style.transition = `transform ${backTime}s`;
   el.style.transform  = '';
   requestAnimationFrame(() => {
@@ -337,13 +335,15 @@ function Log(debug: boolean, ...args: any[]): void {
  * @constructor
  */
 
-function Emit(vnode: any, event: any, hasSwipedAway: boolean = false): void {
+function Emit(vnode: VNode, event: any, hasSwipedAway: boolean = false): void {
   const eventName = hasSwipedAway ? 'swiped-away' : 'swiped';
+  // @ts-ignore // TODO: Fix
   vnode.context.$emit(eventName, event);
   if (vnode.componentInstance) {
     vnode.componentInstance.$emit(eventName, event); // use {detail:} to be uniform
   }
   else {
+    // @ts-ignore // TODO: Fix
     vnode.elm.dispatchEvent(new CustomEvent(eventName, {detail: event}));
   }
 }
@@ -360,7 +360,7 @@ function GetAllowedDirectionSign(direction: AllowedDirection): number {
   }
 }
 
-function HandleTransform(el: any, targetPosition: number, swipeTime: number = .5, resetTime: number, type: SwipeType, sign: boolean) {
+function HandleTransform(el: HTMLElement, targetPosition: number, swipeTime: number = .5, resetTime: number, type: SwipeType, sign: boolean) {
   const actualTargetPosition = (sign ? 1 : -1) * targetPosition;
   el.style.transition        = `all ${swipeTime}s`;
   if (type == 'horizontal') {
