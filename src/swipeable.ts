@@ -1,19 +1,4 @@
-interface DraggableParameters {
-  swipeOutThreshold: string;
-  backTime: number; // Animation time for the transform 0
-  swipeTime: number; // Animation time for the swipe
-  type: SwipeType;
-  swipeOut: boolean;
-  swipeOutBy: string; // IN PIXELS OR PERCENTAGE 5 or 5px become 5 while 50% in a 100px containers becomes 50
-  threshold: number; // Minimum amount of pixels of movement before a swipe is registered
-  allowedDirection: AllowedDirection;
-  debug: boolean;
-  max: string | null;
-  swipeAway: boolean;
-  swipeAwayBy: string; // 5, 5px or 5% => The amount of pixels that the element will be swipedAway
-  swipeAwayThreshold: string; // 5, 5px or 5% || the amount of pixels after which a swipeAway is detected
-  // TODO: Add "hold" preference
-}
+import {DraggableParameters, SwipeableDirective, AllowedDirection, SwipeType} from './types';
 
 const DefaultParameters: DraggableParameters = {
   swipeOutThreshold: '25%', // TODO: WON'T WORK
@@ -31,11 +16,8 @@ const DefaultParameters: DraggableParameters = {
   swipeAwayThreshold: '55%',
 };
 
-type SwipeType = 'horizontal' | 'vertical'; //TODO: add 'any'
-type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
-
-const Swipeable: any = {
-  bind: async (el: any, binding: { value: DraggableParameters }, vnode: any) => {
+const Swipeable: SwipeableDirective = {
+  bind: async (el: any, binding: { value: DraggableParameters }, vnode: any) : Promise<void> => {
     await HasRendered(); // Ensures that bindings have been evaluated
     let detectedScroll: boolean | null = false;
     let swipedOut                      = false;
