@@ -3,13 +3,12 @@
     "lib": [
       "es6",
       "es2017",
-      "dom",
-      "es5"
+      "dom"
     ],
     "target": "es5",
-    "module": "es6",
+    "module": "commonjs",
     "declaration": true,
-    "outDir": "./lib",
+    "outDir": "./dist",
     "strict": true
   },
   "include": ["src"],
