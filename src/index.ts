@@ -1,6 +1,6 @@
 // export const Tmp = (param: string) => `Tmp ${param}`;
 
 
-import Draggable from './draggable';
+import Swipeable from './swipeable';
 
-export default Draggable;
+export default Swipeable;

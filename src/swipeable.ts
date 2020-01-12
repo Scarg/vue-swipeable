@@ -34,7 +34,7 @@ const DefaultParameters: DraggableParameters = {
 type SwipeType = 'horizontal' | 'vertical'; //TODO: add 'any'
 type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
 
-const Draggable: any = {
+const Swipeable: any = {
   bind: async (el: any, binding: { value: DraggableParameters }, vnode: any) => {
     await HasRendered(); // Ensures that bindings have been evaluated
     let detectedScroll: boolean | null = false;
@@ -403,4 +403,4 @@ function HasRendered(): Promise<void> {
   });
 }
 
-export default Draggable;
+export default Swipeable;
