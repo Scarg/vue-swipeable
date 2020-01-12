@@ -5,7 +5,7 @@ export type SwipeType = 'horizontal' | 'vertical'; //TODO: add 'any'
 
 export type AllowedDirection = 'top' | 'bottom' | 'left' | 'right' | null;
 
-export interface DirectiveParameters {
+export interface SwipeableParameters {
   swipeOutThreshold?: string;
   backTime?: number; // Animation time for the transform 0
   swipeTime?: number; // Animation time for the swipe
@@ -27,7 +27,7 @@ export interface SwipeableDirective extends DirectiveOptions {
 }
 
 export interface SwipeableDirectiveBinding extends DirectiveBinding {
- readonly value?: DirectiveParameters
+ readonly value?: SwipeableParameters
 }
 
 type SwipeableFunction = (

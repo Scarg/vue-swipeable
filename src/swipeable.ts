@@ -1,7 +1,7 @@
-import {DirectiveParameters, SwipeableDirective, AllowedDirection, SwipeType, SwipeableDirectiveBinding} from './types';
+import {SwipeableParameters, SwipeableDirective, AllowedDirection, SwipeType, SwipeableDirectiveBinding} from './types';
 import {VNode}                                                                                           from 'vue/types/vnode';
 
-const DefaultParameters: DirectiveParameters = {
+const DefaultParameters: SwipeableParameters = {
   swipeOutThreshold: '25%', // TODO: WON'T WORK
   backTime: .5,
   swipeTime: .5,
@@ -41,12 +41,12 @@ const Swipeable: SwipeableDirective = {
             swipeAwayThreshold,
           } = parameters;
 
-    const AllowedDirectionNumber = GetAllowedDirectionSign(<"top" | "bottom" | "left" | "right" | null> allowedDirection);
+    const AllowedDirectionNumber = GetAllowedDirectionSign(<'top' | 'bottom' | 'left' | 'right' | null> allowedDirection);
 
-    const SwipeOutThresholdPixels  = GetActualPixels(<string> swipeOutThreshold, el, <"horizontal" | "vertical"> type);
-    const SwipeOutByPixels         = GetActualPixels(<string> swipeOutBy, el, <"horizontal" | "vertical"> type);
-    const SwipeAwayThresholdPixels = GetActualPixels(<string> swipeAwayThreshold, el, <"horizontal" | "vertical"> type);
-    const SwipeAwayByPixels        = GetActualPixels(<string> swipeAwayBy, el, <"horizontal" | "vertical"> type);
+    const SwipeOutThresholdPixels  = GetActualPixels(<string> swipeOutThreshold, el, <'horizontal' | 'vertical'> type);
+    const SwipeOutByPixels         = GetActualPixels(<string> swipeOutBy, el, <'horizontal' | 'vertical'> type);
+    const SwipeAwayThresholdPixels = GetActualPixels(<string> swipeAwayThreshold, el, <'horizontal' | 'vertical'> type);
+    const SwipeAwayByPixels        = GetActualPixels(<string> swipeAwayBy, el, <'horizontal' | 'vertical'> type);
     let initialX                   = 0;
     let initialY                   = 0;
 
@@ -87,7 +87,7 @@ const Swipeable: SwipeableDirective = {
         return;
       }
       if (
-          ShouldSkip(<"horizontal" | "vertical"> type, touchObj.pageY, initialY, touchObj.pageX, initialX, <number> threshold, <boolean> debug)
+          ShouldSkip(<'horizontal' | 'vertical'> type, touchObj.pageY, initialY, touchObj.pageX, initialX, <number> threshold, <boolean> debug)
           && detectedScroll == null
       ) {
         // detectedScroll = true;
@@ -122,7 +122,7 @@ const Swipeable: SwipeableDirective = {
       e.stopImmediatePropagation();
 
       if (swipeAway) {
-        const maxMoveBy = GetActualPixels(<string> swipeAwayBy, el, <"horizontal" | "vertical"> type);
+        const maxMoveBy = GetActualPixels(<string> swipeAwayBy, el, <'horizontal' | 'vertical'> type);
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else if (swipeOut) {
@@ -134,7 +134,7 @@ const Swipeable: SwipeableDirective = {
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else if (max) {
-        const maxMoveBy = GetActualPixels(max, el, <"horizontal" | "vertical"> type);
+        const maxMoveBy = GetActualPixels(max, el, <'horizontal' | 'vertical'> type);
         newMoveBy       = maxMoveBy < Math.abs(movedBy) ? maxMoveBy : Math.abs(movedBy);
       }
       else {
