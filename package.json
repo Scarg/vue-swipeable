@@ -1,6 +1,6 @@
 {
   "name": "vue-swipeable",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,20 @@
     "type": "git",
     "url": "git+https://github.com/Scarg/vue-swipeable.git"
   },
-  "keywords": [],
+  "keywords": [
+    "vue",
+    "typescript",
+    "swipe",
+    "drag",
+    "directive",
+    "draggable",
+    "swipeable",
+    "pull",
+    "pullable",
+    "notification",
+    "action",
+    "refresh"
+  ],
   "author": "Artem Martynyuk aka Scarg",
   "license": "MIT",
   "bugs": {

@@ -8,7 +8,7 @@ The combination of the first two will give you a behaviour similar to the one yo
 The third option allows you implement, for example, a "pull to refresh" behaviour.
 
 ## Installation
-`` npm install --add vue-swipeable ``
+`` npm i vue-swipeable ``
 or 
 `` yarn add vue-swipeable ``
 
