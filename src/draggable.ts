@@ -68,13 +68,13 @@ const Draggable: any = {
     let initialY                   = 0;
 
     el.addEventListener('touchstart', (e: any) => {
+      el.style.transition = '';
 
       if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
         return;
       }
 
       const touchObj      = e.changedTouches[0];
-      el.style.transition = 'none';
       if (!swipedOut) {
         initialX = touchObj.pageX;
         initialY = touchObj.pageY;
