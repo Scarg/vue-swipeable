@@ -1,7 +1,7 @@
 # vue-swipeable
 Vue-swipeable is a Vue directive that serves multiple purposes:
-* Swiping away a component (e.g: clearing up a notification)
-* Partially swiping a component in order to reveal an option underneath
+* Swiping away a component (e.g: disposing a notification)
+* Partially swiping a component in order to reveal an action underneath
 * Pulling a component in order to trigger a particular action (e.g: pull to refresh)
 
 The combination of the first two will give you a behaviour similar to the one you have with Android notifications (swipe partially to reveal some actions or swipe up to a certain threshold to remove the notification).
