@@ -15,7 +15,9 @@
     "staticpath": "demo/dist",
     "prep": [
       "build-demo"
-    ]
+    ],
+    "noprompt": true,
+    "commit": "gh-deploy-test"
   },
   "repository": {
     "type": "git",
