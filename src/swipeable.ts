@@ -204,7 +204,7 @@ const Swipeable: SwipeableDirective = {
           if (hasSwipedAway || hasSwipedOut) {
             swipedOut   = true; // It's not actually needed for the swipeAway logic.
             const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
-            Emit(vnode, event, hasSwipedAway);
+            Emit(vnode, event, swipeAway && hasSwipedAway);
             Log(<boolean> debug, 'END: emitting swipe');
           }
         });
@@ -226,7 +226,7 @@ const Swipeable: SwipeableDirective = {
 
           if (hasSwipedAway || hasSwipedOut) {
             const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
-            Emit(vnode, event, hasSwipedAway);
+            Emit(vnode, event, swipeAway && hasSwipedAway);
             Log(<boolean> debug, 'END: emitting swipe');
           }
 
