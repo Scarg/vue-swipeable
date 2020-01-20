@@ -1,5 +1,5 @@
 # vue-swipeable
-Vue-swipeable is a Vue directive that serves multiple purposes:
+Vue-swipeable is a Vue directive that serves multiple purposes on mobile devices (uses touch events):
 * Swiping away a component (e.g: disposing a notification)
 * Partially swiping a component in order to reveal an action underneath
 * Pulling a component in order to trigger a particular action (e.g: pull to refresh)
@@ -14,6 +14,10 @@ or
 
 ## Demo 
 Will be add in the near future.
+
+### Temporary Demo:
+[Link](https://scarg.github.io/vue-swipeable/)
+I just setup a temporary gh-pages with the same "configuration" object that you can find in the configuration section.
 
 ## Configuration
 
