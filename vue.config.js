@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: '/',
+  publicPath: '/vue-swipeable/',
   css: {
     extract: false
   }
