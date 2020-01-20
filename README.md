@@ -14,15 +14,15 @@ or
 
 ## Demo 
 
-[Link](https://scarg.github.io/vue-swipeable/)([source](https://github.com/Scarg/vue-swipeable/blob/gh-pages/demo/src/App.vue))
+[Link](https://scarg.github.io/vue-swipeable/)([source](https://github.com/Scarg/vue-swipeable/blob/gh-pages/demo/src/App.vue)) - Test on a mobile device or in chrome's mobile mode.
 
 ### Example 1
 Simple button with almost the same options as the ones you can find in the configuration section.
 
-## Example 2
+### Example 2
 Example of a button that you can drag to the left or to the right to reveal some kind of action underneath.
 
-## Example 3:
+### Example 3:
 A sorta replica of how the mobile notifications work:
  - If you drag to one side by less than 50% of its size you are able to see specific actions undearneath
  - If you grad to one side by more than 50% of its size the element goes to the side and disappears
