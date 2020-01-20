@@ -1,5 +1,6 @@
 .idea
 /lib
+/demo
 node_modules
 tmp
 package_github.json
