@@ -8,6 +8,7 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "tslint -p tsconfig.json",
+    "serve-demo": "vue-cli-service serve ./demo/src/main.js",
     "build-demo": "vue-cli-service build demo/src/main.js --dest ./demo/dist",
     "deploy-demo": "gh-pages-deploy"
   },
