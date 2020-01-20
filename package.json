@@ -7,7 +7,15 @@
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+    "build-demo": "vue-cli-service build demo/src/main.js --dest ./demo/dist",
+    "deploy-demo": "gh-pages-deploy"
+  },
+  "gh-pages-deploy": {
+    "staticpath": "demo/dist",
+    "prep": [
+      "build-demo"
+    ]
   },
   "repository": {
     "type": "git",
@@ -34,8 +42,13 @@
   },
   "homepage": "https://github.fcom/Scarg/vue-swipeable#readme",
   "devDependencies": {
+    "@types/vue": "^2.0.0",
+    "@vue/cli-service": "^4.1.2",
+    "gh-pages-deploy": "^0.5.1",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.4",
+    "vue": "^2.6.11",
+    "vue-template-compiler": "^2.6.11"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"
@@ -49,7 +62,5 @@
   "files": [
     "dist/**/*"
   ],
-  "dependencies": {
-    "@types/vue": "^2.0.0"
-  }
+  "dependencies": {}
 }

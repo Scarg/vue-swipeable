@@ -4,3 +4,4 @@
 node_modules
 tmp
 package_github.json
+/demo/dist
