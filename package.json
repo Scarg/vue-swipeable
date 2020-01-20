@@ -1,6 +1,6 @@
 {
   "name": "vue-swipeable",
-  "version": "0.0.12",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -35,7 +35,8 @@
   "homepage": "https://github.fcom/Scarg/vue-swipeable#readme",
   "devDependencies": {
     "tslint": "^5.20.1",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.4",
+    "@types/vue": "^2.0.0"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"
@@ -49,7 +50,5 @@
   "files": [
     "dist/**/*"
   ],
-  "dependencies": {
-    "@types/vue": "^2.0.0"
-  }
+  "dependencies": {}
 }
