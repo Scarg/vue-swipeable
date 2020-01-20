@@ -17,7 +17,8 @@ Will be add in the near future.
 
 ### Temporary Demo:
 [Link](https://scarg.github.io/vue-swipeable/)
-I just setup a temporary gh-pages with the same "configuration" object that you can find in the configuration section.
+
+I just set up a temporary gh-pages with the same "configuration" object that you can find in the configuration section.
 
 ## Configuration
 
