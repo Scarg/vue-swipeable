@@ -14,7 +14,8 @@ or
 
 ## Demo 
 
-[Link](https://scarg.github.io/vue-swipeable/)([source](https://github.com/Scarg/vue-swipeable/blob/gh-pages/demo/src/App.vue)) - Test on a mobile device or in chrome's mobile mode.
+[Link](https://scarg.github.io/vue-swipeable/)([source](https://github.com/Scarg/vue-swipeable/blob/gh-pages/demo/src/App.vue)) - Test on a mobile device or in chrome's mobile mode.<br/>
+The directive relies on Touch events, you can't test it on desktop without switching to mobile mode.
 
 ### Example 1
 Simple button with almost the same options as the ones you can find in the configuration section.
@@ -24,10 +25,10 @@ Example of a button that you can drag to the left or to the right to reveal some
 
 ### Example 3:
 A sorta replica of how the mobile notifications work:
- - If you drag to one side by less than 50% of its size you are able to see specific actions undearneath
+ - If you drag to one side by less than 50% of its size you are able to see specific actions underneath
  - If you grad to one side by more than 50% of its size the element goes to the side and disappears
  
-### Page (Example 4)
+### Example 4 (the whole page):
 You can drag to the bottom to toggle a refresh action (you can try to set an height greater than your viewport on the body in order to test your scrolling behaviour, you will see that the directive won't break the expected behaviour: it will ignore any touch event if you are not at the top of the page).
 
 
@@ -84,12 +85,14 @@ So in case of a `type = 'horizontal'` on a `button` that is _100px_ wide, a valu
 ## Events
 | Event | Description | Data |
 | ----- | ----- | ----- |
-| 'swiped' | Triggered when the user has realeased the element after a movement greated than the swipeAwayThreshold | {direction: 'top'} ('top', 'bottom', 'left' or 'right') |
-| 'swiped-away' | Triggered when the user has realeased the element after a movement greated than the swipeOutThreshold | {direction: 'top'} ('top', 'bottom', 'left' or 'right') |
+| 'swiped' | Triggered when the user has released the element after a movement greater than the swipeAwayThreshold | {direction: 'top'} ('top', 'bottom', 'left' or 'right') |
+| 'swiped-away' | Triggered when the user has released the element after a movement greater than the swipeOutThreshold | {direction: 'top'} ('top', 'bottom', 'left' or 'right') |
 
 
-## Known stuff
+## Known stuff | Issues | Notes
 * Proper validation on the parameters is missing
+* At the moment the directive avoids any disruption only on **vertical** scrolling
+
 
 ## Contacts
-[scarg.dev+vueswipeable@gmail.com](mailto:scarg.dev+vueswipeable@gmai.com)
+[scarg.dev+vueswipeable@gmail.com](mailto:scarg.dev+vueswipeable@gmail.com)
