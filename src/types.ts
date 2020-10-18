@@ -36,3 +36,10 @@ type SwipeableFunction = (
   vnode: VNode,
   oldVnode: VNode
 ) => Promise<void>;
+
+
+export enum ScrollDetectionEnum {
+  UNKNOWN      = 1,
+  DETECTED     = 2,
+  NOT_DETECTED = 3,
+};
