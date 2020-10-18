@@ -1,8 +1,8 @@
 # vue-swipeable
-Vue-swipeable is a Vue directive that serves multiple purposes:
-* Swiping away a component (e.g: clearing up a notification)
-* Partially swiping a component in order to reveal an option underneath
-* Pulling a component in order to trigger a particular action (e.g: pull to refresh)
+Vue-swipeable is a Vue directive that serves multiple purposes on mobile devices (uses touch events):
+* Swiping away a component (e.g: disposing a notification)
+* Partially swiping a component in order to reveal an action underneath
+* Pulling a component in order to trigger a particular action (e.g: pull to refresh) (note: this directive does not break your normal scrolling behaviour)
 
 The combination of the first two will give you a behaviour similar to the one you have with Android notifications (swipe partially to reveal some actions or swipe up to a certain threshold to remove the notification).
 The third option allows you implement, for example, a "pull to refresh" behaviour.
@@ -13,7 +13,23 @@ or
 `` yarn add vue-swipeable ``
 
 ## Demo 
-Will be add in the near future.
+
+[Link](https://scarg.github.io/vue-swipeable/)([source](https://github.com/Scarg/vue-swipeable/blob/gh-pages/demo/src/App.vue)) - Test on a mobile device or in chrome's mobile mode.
+
+### Example 1
+Simple button with almost the same options as the ones you can find in the configuration section.
+
+### Example 2
+Example of a button that you can drag to the left or to the right to reveal some kind of action underneath.
+
+### Example 3:
+A sorta replica of how the mobile notifications work:
+ - If you drag to one side by less than 50% of its size you are able to see specific actions undearneath
+ - If you grad to one side by more than 50% of its size the element goes to the side and disappears
+ 
+### Page (Example 4)
+You can drag to the bottom to toggle a refresh action (you can try to set an height greater than your viewport on the body in order to test your scrolling behaviour, you will see that the directive won't break the expected behaviour: it will ignore any touch event if you are not at the top of the page).
+
 
 ## Configuration
 

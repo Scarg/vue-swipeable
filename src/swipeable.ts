@@ -226,7 +226,7 @@ const Swipeable: SwipeableDirective = {
 
           if (hasSwipedAway || hasSwipedOut) {
             const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
-            Emit(vnode, event, hasSwipedAway);
+            Emit(vnode, event, swipeAway && hasSwipedAway);
             Log(<boolean> debug, 'END: emitting swipe');
           }
 
