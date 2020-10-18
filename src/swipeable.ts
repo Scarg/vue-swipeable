@@ -17,16 +17,14 @@ const DefaultParameters: SwipeableParameters = {
   swipeAwayThreshold: '55%',
 };
 
-let resetTimeout: NodeJS.Timeout | null = null;
-let resetStartedAt: number;
-let resetAtPosition: Touch;
-
 const Swipeable: SwipeableDirective = {
   bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode): Promise<void> => {
     await HasRendered(); // Ensures that bindings have been evaluated
-    let detectedScroll: boolean | null = false;
-    let swipedOut                      = false;
-
+    let detectedScroll: boolean | null      = false;
+    let swipedOut                           = false;
+    let resetTimeout: NodeJS.Timeout | null = null;
+    let resetStartedAt: number;
+    let resetAtPosition: Touch;
     const parameters = {...DefaultParameters, ...binding.value};
 
     const {
@@ -53,6 +51,20 @@ const Swipeable: SwipeableDirective = {
     const SwipeAwayByPixels        = GetActualPixels(<string> swipeAwayBy, el, <'horizontal' | 'vertical'> type);
     let initialX                   = 0;
     let initialY                   = 0;
+
+
+    function onResetCompletion() {
+      resetTimeout = null;
+    }
+
+    el.addEventListener('touchstart', touchStartHandler, false);
+
+
+    el.addEventListener('touchmove', touchMoveHandler, false);
+
+    el.addEventListener('touchend', touchEndHandler, false);
+
+
 
     function touchMoveHandler(e: any) {
 
@@ -160,10 +172,7 @@ const Swipeable: SwipeableDirective = {
       });
       return false;
     };
-
-
-
-    el.addEventListener('touchstart', (e: any) => {
+    function touchStartHandler(e: any) {
       el.style.transition = '';
 
       if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
@@ -201,12 +210,8 @@ const Swipeable: SwipeableDirective = {
         resetTimeout = null;
         touchMoveHandler(e);
       }
-    }, false);
-
-
-    el.addEventListener('touchmove', touchMoveHandler, false);
-
-    el.addEventListener('touchend', (e: any) => {
+    };
+    function touchEndHandler(e: any) {
       const touchObj = e.changedTouches[0];
       if (detectedScroll) {
         Log(<boolean> debug, 'END: detectedscroll');
@@ -226,17 +231,18 @@ const Swipeable: SwipeableDirective = {
             HandleTransform(el, SwipeOutByPixels, swipeTime, <number> backTime, type, touchObj.pageX - initialX > 0);
           }
           else {
-            resetTimeout = Reset(el, <number> backTime);
+            resetStartedAt = Date.now();
+            resetTimeout = Reset(el, <number> backTime, onResetCompletion);
             resetAtPosition = touchObj;
             swipedOut = false;
-            Log(<boolean> debug, 'END: resettings');
+            Log(<boolean> debug, '[TouchEnd] Resetting Position');
           }
 
           if (hasSwipedAway || hasSwipedOut) {
             swipedOut   = true; // It's not actually needed for the swipeAway logic.
             const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
             Emit(vnode, event, swipeAway && hasSwipedAway);
-            Log(<boolean> debug, 'END: emitting swipe');
+            Log(<boolean> debug, '[TouchEnd] Emitting Swipe');
           }
         });
       }
@@ -250,21 +256,23 @@ const Swipeable: SwipeableDirective = {
             swipedOut = true;
           }
           else {
-            resetTimeout = Reset(el, <number> backTime);
-            swipedOut = false;
+            resetStartedAt = Date.now();
             resetAtPosition = touchObj;
-            Log(<boolean> debug, 'END: resettings');
+            resetTimeout = Reset(el, <number> backTime, onResetCompletion);
+            swipedOut = false;
+            Log(<boolean> debug, '[TouchEnd]: Resetting Position');
           }
 
           if (hasSwipedAway || hasSwipedOut) {
             const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
             Emit(vnode, event, swipeAway && hasSwipedAway);
-            Log(<boolean> debug, 'END: emitting swipe');
+            Log(<boolean> debug, '[TouchEnd]: Emitting Swipe');
           }
 
         });
       }
-    }, false);
+    };
+
   },
 };
 
@@ -298,7 +306,7 @@ function ShouldSkip(
 }
 
 /**
- * Get the amount of pixels of a given swipeOutBy value -> 5px becomes 5 while 50% in a 100px containers becomes 50
+ * Get the amount of pixels of a given swipeOutBy value -> 5px becomes 5 while 50% in a 120px containers becomes 60
  * @param inputValue Accepted values are 1, 1% or 1px
  * @param element The dom element of the container
  * @param type Type of swipe ('horizontal' or 'vertical')
@@ -334,16 +342,18 @@ function GetActualPixels(inputValue: string, element: any, type: SwipeType): num
  * swiping in the wanted direction
  * @param el Element
  * @param backTime Animation time for the transform 0
+ * @param callback Function to call on reset completion (after BackTime)
  */
-function Reset(el: HTMLElement, backTime: number): NodeJS.Timeout {
+function Reset(el: HTMLElement, backTime: number, callback?: Function): NodeJS.Timeout {
   el.style.transition = `transform ${backTime}s`;
   el.style.transform  = '';
   // requestAnimationFrame(() => {
-  resetStartedAt = Date.now();
-        return setTimeout(() => {
-          el.style.transition = '';
-          resetTimeout = null;
-        }, backTime * 1000);
+  return setTimeout(() => {
+    el.style.transition = '';
+    if (callback && typeof callback === 'function') {
+      callback();
+    }
+  }, backTime * 1000);
       // }
   // );
 }
