@@ -2,7 +2,6 @@
     <div class="h-screen flex flex-col" style="overflow-x: hidden">
         <div id="app" class="flex flex-col items-center justify-center flex-1 bg-blue-100 main-container"
              v-swipeable="dragToRefresh" @swiped="refreshPage">
-
             <!-- EXAMPLE 1: SIMPLE -->
             <button id="ex-1" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                     v-swipeable="firstExOptions" @swiped="swipedEvent('EX1')"> EX 1
@@ -53,7 +52,7 @@
                 </path>
             </svg>
             </div>
-
+        <h1 class="flex flex-col items-center justify-center bg-blue-100">Version 1.1.1</h1>
         <input v-model="logs" type="text" placeholder="LOGS" readonly
                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 text-center
         leading-tight focus:outline-none focus:shadow-outline">
