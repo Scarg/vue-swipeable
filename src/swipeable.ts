@@ -58,14 +58,49 @@ const Swipeable: SwipeableDirective = {
     }
 
     el.addEventListener('touchstart', touchStartHandler, false);
-
-
     el.addEventListener('touchmove', touchMoveHandler, false);
-
     el.addEventListener('touchend', touchEndHandler, false);
 
 
+    function touchStartHandler(e: any) {
+      el.style.transition = '';
 
+      if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
+        return;
+      }
+
+      const touchObj = e.changedTouches[0];
+
+
+      if (!swipedOut && !resetTimeout) {
+        initialX = touchObj.pageX;
+        initialY = touchObj.pageY;
+        Log(<boolean> debug, 'START: starting', initialX, initialY);
+      }
+      else {
+        Log(<boolean> debug, 'START: starting (ALREADY OPEN)');
+      }
+
+      if (resetTimeout) {
+        let resetDelta = Date.now() - resetStartedAt;
+        let estimatedMovedBackBy;
+        if (type == 'vertical') {
+          let movedByBeforeReset = max ? Math.min(resetAtPosition.pageY - initialY, GetActualPixels(max, el, 'vertical')) : resetAtPosition.pageY - initialY;
+          estimatedMovedBackBy = resetDelta * (movedByBeforeReset) / (<number>backTime * 1000);
+          initialY = touchObj.pageY - (movedByBeforeReset - estimatedMovedBackBy);
+          initialX = touchObj.pageX;
+        }
+        else {
+          let movedByBeforeReset = max ? Math.min(resetAtPosition.pageX - initialX, GetActualPixels(max, el, 'horizontal')) : resetAtPosition.pageX - initialX;
+          estimatedMovedBackBy = resetDelta * (movedByBeforeReset) / (<number>backTime * 1000);
+          initialX = touchObj.pageX - (movedByBeforeReset - estimatedMovedBackBy);
+          initialY = touchObj.pageY;
+        }
+        clearTimeout(resetTimeout);
+        resetTimeout = null;
+        touchMoveHandler(e);
+      }
+    };
     function touchMoveHandler(e: any) {
 
 
@@ -171,45 +206,6 @@ const Swipeable: SwipeableDirective = {
         }
       });
       return false;
-    };
-    function touchStartHandler(e: any) {
-      el.style.transition = '';
-
-      if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
-        return;
-      }
-
-      const touchObj = e.changedTouches[0];
-
-
-      if (!swipedOut && !resetTimeout) {
-        initialX = touchObj.pageX;
-        initialY = touchObj.pageY;
-        Log(<boolean> debug, 'START: starting', initialX, initialY);
-      }
-      else {
-        Log(<boolean> debug, 'START: starting (ALREADY OPEN)');
-      }
-
-      if (resetTimeout) {
-        let resetDelta = Date.now() - resetStartedAt;
-        let estimatedMovedBackBy;
-        if (type == 'vertical') {
-          let movedByBeforeReset = max ? Math.min(resetAtPosition.pageY - initialY, GetActualPixels(max, el, 'vertical')) : resetAtPosition.pageY - initialY;
-          estimatedMovedBackBy = resetDelta * (movedByBeforeReset) / (<number>backTime * 1000);
-          initialY = touchObj.pageY - (movedByBeforeReset - estimatedMovedBackBy);
-          initialX = touchObj.pageX;
-        }
-        else {
-          let movedByBeforeReset = max ? Math.min(resetAtPosition.pageX - initialX, GetActualPixels(max, el, 'horizontal')) : resetAtPosition.pageX - initialX;
-          estimatedMovedBackBy = resetDelta * (movedByBeforeReset) / (<number>backTime * 1000);
-          initialX = touchObj.pageX - (movedByBeforeReset - estimatedMovedBackBy);
-          initialY = touchObj.pageY;
-        }
-        clearTimeout(resetTimeout);
-        resetTimeout = null;
-        touchMoveHandler(e);
-      }
     };
     function touchEndHandler(e: any) {
       const touchObj = e.changedTouches[0];
