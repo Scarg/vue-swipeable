@@ -13,11 +13,3 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 * **Directive:** improved how the scroll detection work and solved an issue with conclicts between scrolling and horizontal swiping + replaced "scrollDetected" with proper enum in order to explain the "null" value (as it was actually a 3state variable) ([643bc2b](https://github.com/Scarg/vue-swipeable/commit/643bc2b34486c8d9fe01fe67d0f1fd9da5aa50d2))
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
