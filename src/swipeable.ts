@@ -1,5 +1,5 @@
-import {SwipeableParameters, SwipeableDirective, AllowedDirection, SwipeType, SwipeableDirectiveBinding} from './types';
-import {VNode}                                                                                           from 'vue/types/vnode';
+import {AllowedDirection, ScrollDetectionEnum, SwipeableDirective, SwipeableDirectiveBinding, SwipeableParameters, SwipeType} from './types';
+import {VNode}                                                                                                                from 'vue/types/vnode';
 
 const DefaultParameters: SwipeableParameters = {
   swipeOutThreshold: '25%', // TODO: WON'T WORK
@@ -20,12 +20,13 @@ const DefaultParameters: SwipeableParameters = {
 const Swipeable: SwipeableDirective = {
   bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode): Promise<void> => {
     await HasRendered(); // Ensures that bindings have been evaluated
-    let detectedScroll: boolean | null      = false;
+
+    let detectedScroll: ScrollDetectionEnum = ScrollDetectionEnum.UNKNOWN;
     let swipedOut                           = false;
     let resetTimeout: NodeJS.Timeout | null = null;
     let resetStartedAt: number;
     let resetAtPosition: Touch;
-    const parameters = {...DefaultParameters, ...binding.value};
+    const parameters                        = {...DefaultParameters, ...binding.value};
 
     const {
             swipeOutThreshold,
@@ -66,6 +67,7 @@ const Swipeable: SwipeableDirective = {
       el.style.transition = '';
 
       if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
+        Log(<boolean> debug, el, '[TouchStart] Ignoring vertical scroll');
         return;
       }
 
@@ -75,10 +77,10 @@ const Swipeable: SwipeableDirective = {
       if (!swipedOut && !resetTimeout) {
         initialX = touchObj.pageX;
         initialY = touchObj.pageY;
-        Log(<boolean> debug, 'START: starting', initialX, initialY);
+        Log(<boolean> debug, el, '[TouchStart] Registered', initialX, initialY);
       }
       else {
-        Log(<boolean> debug, 'START: starting (ALREADY OPEN)');
+        Log(<boolean> debug, el, '[TouchStart]: Registered with SwipedOut element)');
       }
 
       if (resetTimeout) {
@@ -107,28 +109,29 @@ const Swipeable: SwipeableDirective = {
       /**
        * Avoids any movement if the draggable element is (?) TODO: Test
        */
-      if (detectedScroll === null && type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
-        detectedScroll = true;
+      if (detectedScroll == ScrollDetectionEnum.UNKNOWN && type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
+        Log(<boolean> debug, el, '[TouchMove] Detected scroll');
+        detectedScroll = ScrollDetectionEnum.DETECTED;
         return;
       }
 
 
       const touchObj = e.changedTouches[0];
-      if (detectedScroll) {
-        Log(<boolean> debug, 'MOVE: detectedScroll');
+      if (detectedScroll == ScrollDetectionEnum.DETECTED) {
+        Log(<boolean> debug, el, '[TouchMove] Detected scroll');
         return;
       }
       if (
           ShouldSkip(<'horizontal' | 'vertical'> type, touchObj.pageY, initialY, touchObj.pageX, initialX, <number> threshold, <boolean> debug)
-          && detectedScroll == null
+          && detectedScroll == ScrollDetectionEnum.UNKNOWN
       ) {
-        // detectedScroll = true;
-        Log(<boolean> debug, 'MOVE: shouldSkip');
+        detectedScroll = ScrollDetectionEnum.DETECTED; // Commented
+        Log(<boolean> debug, el, '[TouchMove] Skipping');
         return;
       }
 
-      let movedBy: number; // TODO: Explain
-      let newMoveBy: number; // TODO: Explain
+      let movedBy: number; // MovedBy is the amount of pixels the finger has been moved
+      let newMoveBy: number; // NewMovedBy is the amount of pixels the element has been moved taking in consideration any limit (e.g: max parameter)
 
       if (type === 'horizontal') {
         movedBy = touchObj.pageX - initialX;
@@ -141,12 +144,14 @@ const Swipeable: SwipeableDirective = {
       /**
        * Flagging as a scroll if there was no movement in any allowed direction before
        */
-      if (detectedScroll === null && AllowedDirectionNumber !== 0 && (AllowedDirectionNumber * movedBy) < 0) {
-        detectedScroll = true;
+      if (detectedScroll === ScrollDetectionEnum.UNKNOWN && AllowedDirectionNumber !== 0 && (AllowedDirectionNumber * movedBy) < 0) {
+        Log(<boolean> debug, el, '[TouchMove] Flagging as scroll, skipping translation');
+        detectedScroll = ScrollDetectionEnum.DETECTED;
         return;
       } // TODO: Describe
-      detectedScroll = false; // TODO: CHECK
+      detectedScroll = ScrollDetectionEnum.NOT_DETECTED; // TODO: CHECK
 
+      Log(<boolean> debug, el, '[TouchMove] Stopping propagation and preventing default.');
       if (e.cancelable) {
         e.preventDefault();
       } // TODO: CHECK
@@ -173,10 +178,10 @@ const Swipeable: SwipeableDirective = {
         newMoveBy = Math.abs(movedBy);
       }
 
-      Log(<boolean> debug, movedBy, 'movedBy');
+      Log(<boolean> debug, el, '[TouchMove] Detected movement of (movedBy, clamped movedBy, initial', movedBy, newMoveBy, initialX, initialY);
 
       requestAnimationFrame(() => {
-        Log(<boolean> debug, 'MOVE: translating');
+        Log(<boolean> debug, el, '[TouchMove] Translating element');
         if (type === 'horizontal') {
           /* Horizontal swipe on X */
           if (allowedDirection === 'right' && movedBy < 0) {
@@ -199,8 +204,8 @@ const Swipeable: SwipeableDirective = {
             return;
           }
 
-          if (detectedScroll === null) {
-            detectedScroll = false;
+          if (detectedScroll == ScrollDetectionEnum.UNKNOWN) {
+            detectedScroll = ScrollDetectionEnum.NOT_DETECTED;
           }
           el.style.transform = `translate3d(0, ${Math.sign(movedBy) * newMoveBy}px, 0)`;
         }
@@ -209,12 +214,12 @@ const Swipeable: SwipeableDirective = {
     };
     function touchEndHandler(e: any) {
       const touchObj = e.changedTouches[0];
-      if (detectedScroll) {
-        Log(<boolean> debug, 'END: detectedscroll');
-        detectedScroll = null;
+      if (detectedScroll == ScrollDetectionEnum.DETECTED) {
+        Log(<boolean> debug, el, '[TouchEnd] Detected scroll');
+        detectedScroll = ScrollDetectionEnum.UNKNOWN;
         return;
       }
-      detectedScroll      = null;
+      detectedScroll      = ScrollDetectionEnum.UNKNOWN;
       const offset        = Math.abs(type === 'horizontal' ? touchObj.pageX - initialX : touchObj.pageY - initialY);
       const hasSwipedOut  = offset >= SwipeOutThresholdPixels;
       const hasSwipedAway = offset >= SwipeAwayThresholdPixels;
@@ -231,14 +236,14 @@ const Swipeable: SwipeableDirective = {
             resetTimeout = Reset(el, <number> backTime, onResetCompletion);
             resetAtPosition = touchObj;
             swipedOut = false;
-            Log(<boolean> debug, '[TouchEnd] Resetting Position');
+            Log(<boolean> debug, el, '[TouchEnd] Resetting Position');
           }
 
           if (hasSwipedAway || hasSwipedOut) {
             swipedOut   = true; // It's not actually needed for the swipeAway logic.
             const event = {direction: touchObj.pageX - initialX > 0 ? 'right' : 'left'};
             Emit(vnode, event, swipeAway && hasSwipedAway);
-            Log(<boolean> debug, '[TouchEnd] Emitting Swipe');
+            Log(<boolean> debug, el, '[TouchEnd] Emitting Swipe');
           }
         });
       }
@@ -256,13 +261,13 @@ const Swipeable: SwipeableDirective = {
             resetAtPosition = touchObj;
             resetTimeout = Reset(el, <number> backTime, onResetCompletion);
             swipedOut = false;
-            Log(<boolean> debug, '[TouchEnd]: Resetting Position');
+            Log(<boolean> debug, el, '[TouchEnd]: Resetting Position');
           }
 
           if (hasSwipedAway || hasSwipedOut) {
             const event = {direction: touchObj.pageY - initialY > 0 ? 'top' : 'bottom'};
             Emit(vnode, event, swipeAway && hasSwipedAway);
-            Log(<boolean> debug, '[TouchEnd]: Emitting Swipe');
+            Log(<boolean> debug, el, '[TouchEnd]: Emitting Swipe');
           }
 
         });
@@ -292,7 +297,7 @@ function ShouldSkip(
     initialX: number,
     threshold: number,
     debug: boolean): boolean { // TODO: Fix madman indentation
-  Log(debug, 'SKIP_CHECK -> ', {...arguments}); // TODO: remove useless debug line
+  Log(debug, null,'[SkipCheck] Checking if the swipe should be skipped', {...arguments}); // TODO: remove useless debug line
   if (type === 'horizontal') {
     return Math.abs(pageX - initialX) < threshold;
   }
@@ -357,12 +362,13 @@ function Reset(el: HTMLElement, backTime: number, callback?: Function): NodeJS.T
 /**
  * Just a dumb shorthand for Logs;
  * @param debug
+ * @param el Element used to retrieve ID
  * @param args
  * @constructor
  */
-function Log(debug: boolean, ...args: any[]): void {
+function Log(debug: boolean, el?: HTMLElement | null, ...args: any[]): void {
   if (debug) {
-    console.log(args);
+    console.trace(el && el.id ? `Element ID: ${el.id}` : 'Unknown element ID', args);
   }
 }
 
