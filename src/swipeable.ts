@@ -17,6 +17,10 @@ const DefaultParameters: SwipeableParameters = {
   swipeAwayThreshold: '55%',
 };
 
+let resetTimeout: NodeJS.Timeout | null = null;
+let resetStartedAt: number;
+let resetAtPosition: Touch;
+
 const Swipeable: SwipeableDirective = {
   bind: async (el: HTMLElement, binding: SwipeableDirectiveBinding, vnode: VNode): Promise<void> => {
     await HasRendered(); // Ensures that bindings have been evaluated
@@ -50,26 +54,7 @@ const Swipeable: SwipeableDirective = {
     let initialX                   = 0;
     let initialY                   = 0;
 
-    el.addEventListener('touchstart', (e: any) => {
-      el.style.transition = '';
-
-      if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
-        return;
-      }
-
-      const touchObj = e.changedTouches[0];
-      if (!swipedOut) {
-        initialX = touchObj.pageX;
-        initialY = touchObj.pageY;
-        Log(<boolean> debug, 'START: starting', initialX, initialY);
-      }
-      else {
-        Log(<boolean> debug, 'START: starting (ALREADY OPEN)');
-      }
-    }, false);
-
-
-    el.addEventListener('touchmove', (e: any) => {
+    function touchMoveHandler(e: any) {
 
 
       /**
@@ -174,7 +159,52 @@ const Swipeable: SwipeableDirective = {
         }
       });
       return false;
+    };
+
+
+
+    el.addEventListener('touchstart', (e: any) => {
+      el.style.transition = '';
+
+      if (type === 'vertical' && ((el.getBoundingClientRect().top - el.offsetTop) * AllowedDirectionNumber < 0)) {
+        return;
+      }
+
+      const touchObj = e.changedTouches[0];
+
+
+      if (!swipedOut && !resetTimeout) {
+        initialX = touchObj.pageX;
+        initialY = touchObj.pageY;
+        Log(<boolean> debug, 'START: starting', initialX, initialY);
+      }
+      else {
+        Log(<boolean> debug, 'START: starting (ALREADY OPEN)');
+      }
+
+      if (resetTimeout) {
+        let resetDelta = Date.now() - resetStartedAt;
+        let estimatedMovedBackBy;
+        if (type == 'vertical') {
+          let movedByBeforeReset = max ? Math.min(resetAtPosition.pageY - initialY, GetActualPixels(max, el, 'vertical')) : resetAtPosition.pageY - initialY;
+          estimatedMovedBackBy = resetDelta * (movedByBeforeReset) / (<number>backTime * 1000);
+          initialY = touchObj.pageY - (movedByBeforeReset - estimatedMovedBackBy);
+          initialX = touchObj.pageX;
+        }
+        else {
+          let movedByBeforeReset = max ? Math.min(resetAtPosition.pageX - initialX, GetActualPixels(max, el, 'horizontal')) : resetAtPosition.pageX - initialX;
+          estimatedMovedBackBy = resetDelta * (movedByBeforeReset) / (<number>backTime * 1000);
+          initialX = touchObj.pageX - (movedByBeforeReset - estimatedMovedBackBy);
+          initialY = touchObj.pageY;
+        }
+        clearTimeout(resetTimeout);
+        resetTimeout = null;
+        touchMoveHandler(e);
+      }
     }, false);
+
+
+    el.addEventListener('touchmove', touchMoveHandler, false);
 
     el.addEventListener('touchend', (e: any) => {
       const touchObj = e.changedTouches[0];
@@ -196,7 +226,8 @@ const Swipeable: SwipeableDirective = {
             HandleTransform(el, SwipeOutByPixels, swipeTime, <number> backTime, type, touchObj.pageX - initialX > 0);
           }
           else {
-            Reset(el, <number> backTime);
+            resetTimeout = Reset(el, <number> backTime);
+            resetAtPosition = touchObj;
             swipedOut = false;
             Log(<boolean> debug, 'END: resettings');
           }
@@ -219,8 +250,9 @@ const Swipeable: SwipeableDirective = {
             swipedOut = true;
           }
           else {
-            Reset(el, <number> backTime);
+            resetTimeout = Reset(el, <number> backTime);
             swipedOut = false;
+            resetAtPosition = touchObj;
             Log(<boolean> debug, 'END: resettings');
           }
 
@@ -303,15 +335,17 @@ function GetActualPixels(inputValue: string, element: any, type: SwipeType): num
  * @param el Element
  * @param backTime Animation time for the transform 0
  */
-function Reset(el: HTMLElement, backTime: number): void {
+function Reset(el: HTMLElement, backTime: number): NodeJS.Timeout {
   el.style.transition = `transform ${backTime}s`;
   el.style.transform  = '';
-  requestAnimationFrame(() => {
-        setTimeout(() => {
+  // requestAnimationFrame(() => {
+  resetStartedAt = Date.now();
+        return setTimeout(() => {
           el.style.transition = '';
+          resetTimeout = null;
         }, backTime * 1000);
-      }
-  );
+      // }
+  // );
 }
 
 /**
