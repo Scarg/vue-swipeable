@@ -23,7 +23,7 @@ const Swipeable: SwipeableDirective = {
 
     let detectedScroll: ScrollDetectionEnum = ScrollDetectionEnum.UNKNOWN;
     let swipedOut                           = false;
-    let resetTimeout: NodeJS.Timeout | null = null;
+    let resetTimeout: number | null = null;
     let resetStartedAt: number;
     let resetAtPosition: Touch;
     const parameters                        = {...DefaultParameters, ...binding.value};
@@ -74,7 +74,7 @@ const Swipeable: SwipeableDirective = {
       const touchObj = e.changedTouches[0];
 
 
-      if (!swipedOut && !resetTimeout) {
+      if (!swipedOut && resetTimeout === null) {
         initialX = touchObj.pageX;
         initialY = touchObj.pageY;
         Log(<boolean> debug, el, '[TouchStart] Registered', initialX, initialY);
@@ -83,7 +83,7 @@ const Swipeable: SwipeableDirective = {
         Log(<boolean> debug, el, '[TouchStart]: Registered with SwipedOut element)');
       }
 
-      if (resetTimeout) {
+      if (resetTimeout !== null) {
         let resetDelta = Date.now() - resetStartedAt;
         let estimatedMovedBackBy;
         if (type == 'vertical') {
@@ -345,7 +345,7 @@ function GetActualPixels(inputValue: string, element: any, type: SwipeType): num
  * @param backTime Animation time for the transform 0
  * @param callback Function to call on reset completion (after BackTime)
  */
-function Reset(el: HTMLElement, backTime: number, callback?: Function): NodeJS.Timeout {
+function Reset(el: HTMLElement, backTime: number, callback?: Function): number {
   el.style.transition = `transform ${backTime}s`;
   el.style.transform  = '';
   // requestAnimationFrame(() => {
